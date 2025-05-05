@@ -4,6 +4,7 @@ import Avatar from "@/components/Avatar";
 import LastWeekActivity from "@/components/LastWeekActivity";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import HomeScreenTile from "@/components/HomeScreenTile";
+import FriendsList from "@/components/friendslist"; 
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 const Home = () => {
@@ -14,6 +15,7 @@ const Home = () => {
           <WelcomeMessage name={"Jordan Anderson"} />
           <Avatar size={50} />
         </View>
+
         <LastWeekActivity />
 
         <View className="gap-4">
@@ -35,6 +37,8 @@ const Home = () => {
             </View>
           </View>
         </View>
+
+        
       </View>
     </SafeAreaView>
   );
