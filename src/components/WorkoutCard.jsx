@@ -1,8 +1,12 @@
-import { View, Text, Image, TouchableOpacity } from "react-native";
 import React from "react";
+import { View, Text, TouchableOpacity, Dimensions } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from "@expo/vector-icons/Entypo";
+
+const screenWidth = Dimensions.get("window").width;
+const cardWidth = (screenWidth - 40) / 2;
+const cardHeight = cardWidth * 0.7; // 30% shorter than width
 
 const WorkoutCard = ({
   title,
@@ -14,54 +18,37 @@ const WorkoutCard = ({
 }) => {
   return (
     <TouchableOpacity
-      id="title"
       onPress={handlePress}
-      className="flex-1 transition-all  aspect-video rounded-xl overflow-hidden"
+      style={{
+        width: cardWidth,
+        height: cardHeight,
+        borderRadius: 20,
+        margin: 10,
+        overflow: "hidden",
+      }}
     >
       <LinearGradient
-        colors={[bgColor, `${bgColor}60`]}
-        start={[1, 0]} // Start from the left
-        end={[0, 0]} // End on the right
-        style={{
-          flex: 1,
-        }}
+        colors={[bgColor, `${bgColor}90`]}
+        start={[1, 0]}
+        end={[0, 0]}
+        style={{ flex: 1, padding: 16, justifyContent: "space-between", alignItems: "center" }}
       >
-        <View
-          className={`flex-1 p-2  items-center ${
-            isSelected ? "flex-col" : "flex-row"
-          }`}
-        >
-          <View
-            className={`flex-1 h-full ${
-              isSelected ? "justify-center items-center  " : "justify-between"
-            }`}
-          >
-            <Text
-              style={{ lineHeight: 80 }}
-              className={`${isSelected ? "text-7xl " : "text-3xl"}`}
-            >
-              {image}
-            </Text>
-            <Text
-              className={`text-white  font-bold ${
-                isSelected ? "text-2xl" : "text-lg"
-              }`}
-            >
-              {title}
-            </Text>
-          </View>
-          {isSelected ? (
-            <Entypo
-              onPress={() => setSelectedWorkout("")}
-              name="cross"
-              size={24}
-              color="white"
-              className="absolute top-4 right-4"
-            />
-          ) : (
-            <MaterialIcons name="navigate-next" size={24} color="white" />
-          )}
-        </View>
+        <Text style={{ fontSize: 36 }}>{image}</Text>
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 18, textAlign: "center" }}>
+          {title}
+        </Text>
+
+        {isSelected ? (
+          <Entypo
+            onPress={() => setSelectedWorkout(null)}
+            name="cross"
+            size={24}
+            color="white"
+            style={{ position: "absolute", top: 10, right: 10 }}
+          />
+        ) : (
+          <MaterialIcons name="navigate-next" size={24} color="white" />
+        )}
       </LinearGradient>
     </TouchableOpacity>
   );
