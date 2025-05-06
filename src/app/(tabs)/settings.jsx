@@ -17,8 +17,7 @@ const settingsArray = [
     title: "My Profile",
     link: "/userdetails",
     icon: <AntDesign name="idcard" size={18} color="black" />,
-  },
-  
+  },  
 
   {
     title: "Contact Us",
