@@ -13,13 +13,16 @@ const Home = () => {
   return (
     <SafeAreaView className="flex-1 bg-black">
       <View className="p-4">
+        {/* Header */}
         <View className="flex-row justify-between items-center my-6">
           <WelcomeMessage name={"Jordan Anderson"} />
           <Avatar size={50} />
         </View>
 
+        {/* Graph */}
         <LastWeekActivity />
 
+        {/* Tiles */}
         <View className="gap-4 mt-4">
           {/* Row 1 */}
           <View className="flex-row justify-between gap-4">
@@ -27,10 +30,9 @@ const Home = () => {
               <HomeScreenTile tileTitle={"Connect"} />
             </View>
 
-            {/* Add onPress to Start Workout */}
             <View className="flex-1">
               <HomeScreenTile
-                onPress={() => router.push("/workout")} // ← navigation
+                onPress={() => router.push("/workoutDetails")}
                 icon={
                   <MaterialCommunityIcons
                     name={"bike"}
@@ -38,7 +40,7 @@ const Home = () => {
                     color="#EB7363"
                   />
                 }
-                tileTitle={"Start workout"}
+                tileTitle={"Start Workout"}
               />
             </View>
           </View>
@@ -58,7 +60,20 @@ const Home = () => {
                 }
               />
             </View>
-            <View className="flex-1" />
+
+            <View className="flex-1">
+              <HomeScreenTile
+                onPress={() => router.push("/friends")}
+                tileTitle="Friends"
+                icon={
+                  <MaterialCommunityIcons
+                    name="account-group"
+                    size={52}
+                    color="#EB7363"
+                  />
+                }
+              />
+            </View>
           </View>
         </View>
       </View>

@@ -34,11 +34,7 @@ const settingsArray = [
     link: "/aboutUs",
     icon: <AntDesign name="infocirlceo" size={18} color="black" />,
   },
-  {
-    title: "Friends List", 
-    link: "/friends",     
-    icon: <AntDesign name="addusergroup" size={18} color="black" />,
-  },
+  
   {
     title: "Delete Account",
     link: "/deleteAccount",
