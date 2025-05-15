@@ -1,5 +1,5 @@
 import { View, Text, FlatList } from "react-native";
-import React, { useContext } from "react";
+import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,11 +17,16 @@ const settingsArray = [
   },
 
   {
+    title: "My Profile",
+    link: "/userdetails",
+    icon: <AntDesign name="idcard" size={18} color="black" />,
+  },  
+
+  {
     title: "Contact Us",
     link: "/contact",
     icon: <AntDesign name="mail" size={18} color="black" />,
   },
-
   {
     title: "My Workout History",
     link: "/workoutHistory",
@@ -37,6 +42,7 @@ const settingsArray = [
     link: "/aboutUs",
     icon: <AntDesign name="infocirlceo" size={18} color="black" />,
   },
+  
   {
     title: "Delete Account",
     link: "/deleteAccount",
@@ -53,7 +59,7 @@ const settingsArray = [
 const settings = () => {
   const { user } = useContext(AuthContext);
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <LinearGradient colors={["#994D74", "#3A1C72"]}>
         <SafeAreaView className="h-[350px] flex justify-center items-center">
           <Avatar size={100} />
@@ -62,12 +68,14 @@ const settings = () => {
           </Text>
         </SafeAreaView>
       </LinearGradient>
+
       <View className="h-full relative -top-14 rounded-[48px] bg-white py-8 px-6">
         <Text className="text-3xl font-bold text-center">Settings</Text>
 
         <FlatList
           data={settingsArray}
           showsVerticalScrollIndicator={false}
+          keyExtractor={(item) => item.title}
           renderItem={({ item }) => (
             <Setting
               isLogOut={!!item.isLogOut}
