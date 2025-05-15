@@ -32,13 +32,14 @@ const WorkoutCard = ({
           }`}
         >
           <View
-            className={`flex-1 h-full  ${
-              isSelected
-                ? "justify-center items-center gap-4 "
-                : "justify-between"
+            className={`flex-1 h-full ${
+              isSelected ? "justify-center items-center  " : "justify-between"
             }`}
           >
-            <Text className={`${isSelected ? "text-7xl" : "text-3xl"}`}>
+            <Text
+              style={{ lineHeight: 80 }}
+              className={`${isSelected ? "text-7xl " : "text-3xl"}`}
+            >
               {image}
             </Text>
             <Text

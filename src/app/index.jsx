@@ -12,7 +12,7 @@ import React, { useState, useContext } from "react";
 import "../../global.css";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TextInputWithLogo from "@/components/TextInputWithLogo";
-import LoginIcon from "@/app/LoginIcon";
+import LoginIcon from "@/components/LoginIcon";
 import { Link, router, useNavigation } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";

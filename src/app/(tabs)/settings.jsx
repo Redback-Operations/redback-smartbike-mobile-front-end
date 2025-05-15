@@ -4,7 +4,10 @@ import { LinearGradient } from "expo-linear-gradient";
 import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+
 import Setting from "@/components/Setting";
+import { AuthContext } from "@/context/authContext";
 
 const settingsArray = [
   {
@@ -30,6 +33,11 @@ const settingsArray = [
     icon: <AntDesign name="barchart" size={18} color="black" />,
   },
   {
+    title: "Privacy Settings",
+    link: "/privacySettings",
+    icon: <AntDesign name="lock1" size={20} color="black" />,
+  },
+  {
     title: "About Us",
     link: "/aboutUs",
     icon: <AntDesign name="infocirlceo" size={18} color="black" />,
@@ -49,12 +57,15 @@ const settingsArray = [
 ];
 
 const settings = () => {
+  const { user } = useContext(AuthContext);
   return (
     <View className="flex-1">
       <LinearGradient colors={["#994D74", "#3A1C72"]}>
         <SafeAreaView className="h-[350px] flex justify-center items-center">
           <Avatar size={100} />
-          <Text className="font-bold text-lg text-white">Jordan Anderson</Text>
+          <Text className="font-bold text-lg text-white">
+            {user.username ? user.username : "Username"}
+          </Text>
         </SafeAreaView>
       </LinearGradient>
 

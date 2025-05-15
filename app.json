@@ -31,15 +31,10 @@
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "plugins": [
-      "expo-router"
-    ],
+    "plugins": ["expo-router"],
     "extra": {
       "router": {
         "origin": false
-      },
-      "eas": {
-        "projectId": "1d9f3e81-08fc-4646-bd58-7e0e01023d9d"
       }
     }
   }

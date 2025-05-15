@@ -13,10 +13,9 @@ import React, { useContext, useState } from "react";
 import Avatar from "@/components/Avatar";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import DropDown from "@/components/DropDown";
-import ConfirmDeletionModal from "@/components/ConfirmDeletionModal";
 import { AuthContext } from "@/context/authContext";
-import PopUp from "@/components/PopUp";
 import { useHeaderHeight } from "@react-navigation/elements";
+import { router } from "expo-router";
 
 const options = [
   "Poor service",
@@ -53,8 +52,6 @@ const deleteAccount = () => {
     reasonEnum: 0,
   });
 
-  const [confirmDeletion, setConfirmDeletion] = useState(false);
-
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <SafeAreaView className={`h-full bg-white `}>
@@ -64,13 +61,16 @@ const deleteAccount = () => {
           }}
           className=" self-center mb-4  relative"
         >
-          <Avatar size={100} />
-          <View className="bg-red-500 p-2 absolute right-1 bottom-1 w-10 h-10 flex items-center justify-center square rounded-full">
-            <AntDesign name="exclamationcircle" size={14} color="white" />
-          </View>
+          <Avatar
+            size={100}
+            icon={
+              <AntDesign name="exclamationcircle" size={14} color="white" />
+            }
+            iconBgColour={"bg-red-500"}
+          />
         </View>
         <View className="p-4 gap-6">
-          <View className="gap-2">
+          <View className="gap-2 z-10">
             <Text className="text font-semibold">
               Reason for account deletion:
             </Text>
@@ -80,7 +80,7 @@ const deleteAccount = () => {
               selectedOption={formData.reason}
             />
           </View>
-          <View className="gap-2 -z-10">
+          <View className="gap-2 ">
             <Text className="font-semibold">
               Please provide further details:
             </Text>
@@ -92,7 +92,7 @@ const deleteAccount = () => {
               className="text-black h-36  box-border border-[1.5px] rounded-xl p-4 flex items-center justify-center border-gray-200 focus:border-brand-purple"
             />
           </View>
-          <View className="gap-2 -z-10">
+          <View className="gap-2">
             <Text className="font-semibold text-black">
               We're sorry to see you go. Please note:
             </Text>
@@ -108,9 +108,9 @@ const deleteAccount = () => {
             />
           </View>
         </View>
-        <View className="p-4 -z-10 mt-auto">
+        <View className="p-4 mt-auto">
           <TouchableOpacity
-            onPress={() => setConfirmDeletion(true)}
+            onPress={() => router.push("/confirmIntent")}
             className="bg-red-500  rounded-full p-4"
           >
             <Text className="text-white font-semibold text-center">
@@ -118,12 +118,6 @@ const deleteAccount = () => {
             </Text>
           </TouchableOpacity>
         </View>
-
-        <PopUp open={confirmDeletion} setOpen={setConfirmDeletion}>
-          <ConfirmDeletionModal
-            setConfirmDeletion={setConfirmDeletion}
-          ></ConfirmDeletionModal>
-        </PopUp>
       </SafeAreaView>
     </TouchableWithoutFeedback>
   );

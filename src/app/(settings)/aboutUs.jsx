@@ -5,6 +5,7 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
+  Platform,
 } from "react-native";
 import React, { useRef, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
@@ -12,6 +13,7 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { router } from "expo-router";
+import { useHeaderHeight } from "@react-navigation/elements";
 
 const links = [
   {
@@ -41,6 +43,7 @@ const links = [
 ];
 
 const aboutUs = () => {
+  const headerHeight = useHeaderHeight();
   return (
     <SafeAreaView
       style={{
@@ -49,6 +52,7 @@ const aboutUs = () => {
       }}
     >
       <FlatList
+        style={{ paddingTop: Platform.OS === "android" && headerHeight }}
         ListHeaderComponent={
           <View className="p-4  gap-4">
             <Image
