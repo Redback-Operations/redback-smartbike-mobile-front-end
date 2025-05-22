@@ -1,8 +1,7 @@
-import { View, Text, TextInput, TouchableOpacity } from "react-native";
-import React, { useEffect, useContext, useState } from "react";
-import Avatar from "@/components/Avatar";
-import AntDesign from "@expo/vector-icons/AntDesign";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import React, { useContext, useState } from "react";
 import { AuthContext } from "@/context/authContext";
+import * as ImagePicker from "expo-image-picker";
 
 import CustomSafeArea from "@/components/CustomSafeArea";
 const editProfile = () => {
@@ -12,20 +11,64 @@ const editProfile = () => {
   //   setUser({ id: 1, username: "Jordan", email: "jordan@gmail.com" });
   // }, []);
 
+  const [image, setImage] = useState(null);
+
   const submitChanges = async () => {
     //logic to submit changes and update account details.
   };
 
+  const pickImage = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Access to gallery is required!");
+      return;
+    }
+
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
+  const takePhoto = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert("Permission Required", "Access to camera is required!");
+      return;
+    }
+
+    let result = await ImagePicker.launchCameraAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri);
+    }
+  };
+
   return (
     <CustomSafeArea>
-      <View>
-        <Avatar
-          size={100}
-          className="self-center"
-          icon={<AntDesign name="edit" size={14} color="white" />}
-          iconBgColour={"bg-blue-500"}
+      <TouchableOpacity onPress={pickImage} onLongPress={takePhoto} style={{ justifyContent: 'center', alignItems: 'center' }}>
+        <Image
+          source={
+            image
+              ? { uri: image }
+              : require("@assets/avatar.jpg")
+          }
+          style={{ width: 100, height: 100, borderRadius: 50, borderWidth: 1, borderColor: '#00000055' }}
         />
-      </View>
+        <Text className="text-brand-purple text-sm mt-2 text-center">
+          Tap to choose, hold to take photo
+        </Text>
+      </TouchableOpacity>
       {user && (
         <View className="flex-1 gap-4 p-4">
           <View className="gap-2 ">
