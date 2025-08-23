@@ -62,6 +62,8 @@ const WorkoutCard = ({
             <MaterialIcons name="navigate-next" size={24} color="white" />
           )}
         </View>
+       
+
       </LinearGradient>
     </TouchableOpacity>
   );

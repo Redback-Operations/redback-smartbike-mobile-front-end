@@ -22,6 +22,11 @@ const workoutItems = [
     bgColour: "#ff9500",
   },
   {
+  title: "Dance",
+  image: "💃",
+  bgColour: "#ff69b4",
+},
+  {
     title: "Running",
     image: "🏃‍♀️",
     bgColour: "#4cd964",
@@ -36,6 +41,7 @@ const workoutItems = [
     image: "🏋",
     bgColour: "#5956d6",
   },
+  
 ];
 
 const workouts = () => {

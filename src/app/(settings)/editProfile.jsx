@@ -3,17 +3,42 @@ import React, { useEffect, useContext, useState } from "react";
 import Avatar from "@/components/Avatar";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { AuthContext } from "@/context/authContext";
-
 import CustomSafeArea from "@/components/CustomSafeArea";
-const editProfile = () => {
+
+const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
-  const [formData, setFormData] = useState({ username: "", email: "" });
-  // useEffect(() => {
-  //   setUser({ id: 1, username: "Jordan", email: "jordan@gmail.com" });
-  // }, []);
+  const [formData, setFormData] = useState({ username: "", password: "" });
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        username: user.username || "",
+        password: "",
+      });
+    }
+  }, [user]);
 
   const submitChanges = async () => {
-    //logic to submit changes and update account details.
+    try {
+      if (!formData.username || !formData.password) {
+        alert("Please fill in all fields");
+        return;
+      }
+
+      const updatedUser = {
+        ...user,
+        username: formData.username,
+      };
+
+      // Replace with real API call if needed
+      // await api.put(`/user/${user.id}`, updatedUser);
+
+      setUser(updatedUser);
+      alert("Profile updated successfully!");
+    } catch (error) {
+      console.error("Update failed:", error);
+      alert("Something went wrong.");
+    }
   };
 
   return (
@@ -26,9 +51,10 @@ const editProfile = () => {
           iconBgColour={"bg-blue-500"}
         />
       </View>
+
       {user && (
         <View className="flex-1 gap-4 p-4">
-          <View className="gap-2 ">
+          <View className="gap-2">
             <Text>Username:</Text>
             <TextInput
               value={formData.username}
@@ -36,9 +62,10 @@ const editProfile = () => {
                 setFormData({ ...formData, username: text })
               }
               className="border border-gray-400 p-2 rounded-xl"
-              placeholder={user.username ? user.username : "Username"}
+              placeholder="Username"
             />
           </View>
+
           <View className="gap-2">
             <Text>Password:</Text>
             <TextInput
@@ -48,16 +75,13 @@ const editProfile = () => {
                 setFormData({ ...formData, password: text })
               }
               className="border border-gray-400 p-2 rounded-xl"
-              placeholder={"*********"}
+              placeholder="********"
             />
           </View>
 
-          <Text>{formData.username}</Text>
-          <Text>{formData.password}</Text>
-
           <TouchableOpacity
             onPress={submitChanges}
-            className={`bg-brand-purple p-4 rounded-xl mt-auto `}
+            className="bg-brand-purple p-4 rounded-xl mt-auto"
           >
             <Text className="text-white text-center font-semibold">
               Submit Changes
@@ -69,4 +93,4 @@ const editProfile = () => {
   );
 };
 
-export default editProfile;
+export default EditProfile;
