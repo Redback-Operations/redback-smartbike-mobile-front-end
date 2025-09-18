@@ -23,26 +23,6 @@ const workoutItems = [
     bgColour: "#ff9500",
   },
   {
-  title: "Dance",
-  image: "💃",
-  bgColour: "#ff69b4",
-},
-{
-  title: "CrossFit",
-  image: "🏋️‍♀️",
-  bgColour: "#d2691e",
-},
-{
-  title: "Strength Training",
-  image: "💪",
-  bgColour: "#8b0000",
-},
-{
-  title: "Stretching",
-  image: "🤸‍♂️",
-  bgColour: "#20b2aa",
-},
-  {
     title: "Running",
     image: "🏃‍♀️",
     bgColour: "#4cd964",
@@ -132,4 +112,3 @@ const scheduleWorkout = () => {
 };
 
 export default scheduleWorkout;
-

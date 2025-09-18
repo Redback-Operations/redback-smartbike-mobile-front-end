@@ -3,6 +3,7 @@ import React from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from "@expo/vector-icons/Entypo";
+import { useTheme } from "@/context/ThemeContext";
 
 const WorkoutCard = ({
   title,
@@ -12,6 +13,11 @@ const WorkoutCard = ({
   isSelected,
   setSelectedWorkout,
 }) => {
+  const { isDarkMode } = useTheme();
+  
+  // Theme-aware text color
+  const textColor = isDarkMode ? "text-white" : "text-gray-800";
+  
   return (
     <TouchableOpacity
       id="title"
@@ -43,9 +49,9 @@ const WorkoutCard = ({
               {image}
             </Text>
             <Text
-              className={`text-white  font-bold ${
+              className={`font-bold ${
                 isSelected ? "text-2xl" : "text-lg"
-              }`}
+              } -mt-2 ${textColor}`}
             >
               {title}
             </Text>
@@ -55,11 +61,11 @@ const WorkoutCard = ({
               onPress={() => setSelectedWorkout("")}
               name="cross"
               size={24}
-              color="white"
+              color={isDarkMode ? "white" : "#374151"}
               className="absolute top-4 right-4"
             />
           ) : (
-            <MaterialIcons name="navigate-next" size={24} color="white" />
+            <MaterialIcons name="navigate-next" size={24} color={isDarkMode ? "white" : "#374151"} />
           )}
         </View>
       </LinearGradient>

@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import { router } from "expo-router";
+import { useTheme } from "@/context/ThemeContext";
+
 const initialFriends = [
   {
     id: 1,
@@ -35,11 +37,16 @@ const initialFriends = [
 
 const FriendsList = () => {
   const [friends] = useState(initialFriends);
-
+  const { isDarkMode } = useTheme();
+  
+  // Theme-aware colors
+  const bgColor = isDarkMode ? "black" : "white";
+  const textColor = isDarkMode ? "text-white" : "text-gray-800";
+  
   return (
-    <CustomSafeArea>
-      <View className="mt-5">
-        <Text className="text-black text-4xl font-bold mb-2 pl-2">Friends</Text>
+    <CustomSafeArea applyTopInset={false} bgColour={bgColor}>
+      <View className={`mt-5 flex-1 bg-${bgColor}`}>
+        <Text className={`${textColor} text-4xl font-bold mb-2 pl-2`}>Friends</Text>
         <FlatList
           data={friends}
           keyExtractor={(item) => item.id.toString()}

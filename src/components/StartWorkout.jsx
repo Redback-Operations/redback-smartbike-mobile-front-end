@@ -24,6 +24,3 @@ const StartWorkout = () => {
 };
 
 export default StartWorkout;
-
-
-

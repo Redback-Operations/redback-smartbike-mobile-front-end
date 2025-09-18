@@ -13,6 +13,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { router } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useTheme } from "@/context/ThemeContext";
 
 const links = [
   {
@@ -42,65 +43,73 @@ const links = [
 ];
 
 const aboutUs = () => {
+  const { isDarkMode } = useTheme();
+  
+  // Theme-aware colors
+  const bgColor = isDarkMode ? "black" : "white";
+  const textColor = isDarkMode ? "text-white" : "text-gray-800";
+  
   return (
-    <CustomSafeArea>
-      <FlatList
-        ListHeaderComponent={
-          <View className="p-4  gap-4">
-            <Image
-              source={require("@assets/redback-logo.png")}
-              className="w-[130px] h-[130px] self-center"
-              resizeMode="contain"
-            />
+    <CustomSafeArea applyTopInset={false} bgColour={bgColor}>
+      <View className={`flex-1 bg-${bgColor}`}>
+        <FlatList
+          ListHeaderComponent={
+            <View className="p-4  gap-4">
+              <Image
+                source={require("@assets/redback-logo.png")}
+                className="w-[130px] h-[130px] self-center"
+                resizeMode="contain"
+              />
 
-            <Image />
+              <Image />
 
-            <View className="my-6 gap-2 ">
-              <Text className="text-center leading-6">
-                Redback operations aims to turn small steps of virtuality into
-                bigger steps of reality, making you smarter, fitter, and better.
-              </Text>
-              <Text className="text-center leading-6">
-                Bad weather? Traffic? Worry not, our smart bike project
-                transforms your indoor cycling experience but also features an
-                interactive virtual reality game and accessible mobile
-                application to bring the world to you.
-              </Text>
+              <View className="my-6 gap-2 ">
+                <Text className={`text-center leading-6 ${textColor}`}>
+                  Redback operations aims to turn small steps of virtuality into
+                  bigger steps of reality, making you smarter, fitter, and better.
+                </Text>
+                <Text className={`text-center leading-6 ${textColor}`}>
+                  Bad weather? Traffic? Worry not, our smart bike project
+                  transforms your indoor cycling experience but also features an
+                  interactive virtual reality game and accessible mobile
+                  application to bring the world to you.
+                </Text>
+              </View>
             </View>
-          </View>
-        }
-        numColumns={2}
-        columnWrapperStyle={{ gap: 10 }}
-        contentContainerStyle={{ padding: 10, gap: 10 }}
-        data={links}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={{
-              backgroundColor: "gray",
-              borderRadius: 20,
-            }}
-            onPress={() => {
-              item.link && router.push(item.link);
-            }}
-            className=" flex-1 overflow-hidden aspect-video items-between"
-          >
-            <LinearGradient
-              start={[0, 0]}
-              end={[1, 0]}
-              colors={item.bgcolours}
+          }
+          numColumns={2}
+          columnWrapperStyle={{ gap: 10 }}
+          contentContainerStyle={{ padding: 10, gap: 10 }}
+          data={links}
+          renderItem={({ item }) => (
+            <TouchableOpacity
               style={{
-                flex: 1,
-                padding: 16,
+                backgroundColor: "gray",
+                borderRadius: 20,
               }}
+              onPress={() => {
+                item.link && router.push(item.link);
+              }}
+              className=" flex-1 overflow-hidden aspect-video items-between"
             >
-              <View>{item.icon}</View>
-              <Text className="text-white mt-auto text-lg font-semibold">
-                {item.title}
-              </Text>
-            </LinearGradient>
-          </TouchableOpacity>
-        )}
-      />
+              <LinearGradient
+                start={[0, 0]}
+                end={[1, 0]}
+                colors={item.bgcolours}
+                style={{
+                  flex: 1,
+                  padding: 16,
+                }}
+              >
+                <View>{item.icon}</View>
+                <Text className="text-white mt-auto text-lg font-semibold">
+                  {item.title}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
     </CustomSafeArea>
   );
 };

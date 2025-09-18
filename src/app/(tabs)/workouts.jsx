@@ -4,6 +4,7 @@ import WorkoutCard from "@/components/WorkoutCard";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { router } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useTheme } from "@/context/ThemeContext";
 
 const workoutItems = [
   {
@@ -22,26 +23,6 @@ const workoutItems = [
     bgColour: "#ff9500",
   },
   {
-  title: "Dance",
-  image: "💃",
-  bgColour: "#ff69b4",
-},
-{
-  title: "CrossFit",
-  image: "🏋️‍♀️",
-  bgColour: "#d2691e",
-},
-{
-  title: "Strength Training",
-  image: "💪",
-  bgColour: "#8b0000",
-},
-{
-  title: "Stretching",
-  image: "🤸‍♂️",
-  bgColour: "#20b2aa",
-},
-  {
     title: "Running",
     image: "🏃‍♀️",
     bgColour: "#4cd964",
@@ -56,34 +37,44 @@ const workoutItems = [
     image: "🏋",
     bgColour: "#5956d6",
   },
-  
 ];
 
 const workouts = () => {
+  const { isDarkMode } = useTheme();
+  
+  // Theme-aware colors
+  const bgColor = isDarkMode ? "black" : "white";
+  const textColor = isDarkMode ? "white" : "black";
+  
   return (
-    <CustomSafeArea applyTopInset={false} className="flex-1 bg-white">
-      <View className="flex-row justify-between items-center m-2">
-        <Text className="text-brand-purple my-6 font-bold text-4xl">
-          Track your fitness
-        </Text>
-        <TouchableOpacity onPress={() => router.push("/scheduleWorkout")}>
-          <FontAwesome6 name="calendar-plus" size={24} color="black" />
-        </TouchableOpacity>
+    <CustomSafeArea applyTopInset={false} bgColour={bgColor}>
+      <View className={`flex-1 bg-${bgColor}`}>
+        <View className="flex-row justify-between items-center px-4 py-6">
+          <Text style={{ color: textColor }} className="text-brand-purple font-bold text-4xl flex-1">
+            Track your fitness
+          </Text>
+          <TouchableOpacity 
+            onPress={() => router.push("/scheduleWorkout")}
+            className="ml-4"
+          >
+            <FontAwesome6 name="calendar-plus" size={24} color={textColor} />
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          numColumns={2}
+          showsVerticalScrollIndicator={false}
+          data={workoutItems}
+          contentContainerStyle={{ gap: 10, padding: 10 }}
+          columnWrapperStyle={{ gap: 10 }}
+          renderItem={({ item }) => (
+            <WorkoutCard
+              title={item.title}
+              image={item.image}
+              bgColor={item.bgColour}
+            />
+          )}
+        />
       </View>
-      <FlatList
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        data={workoutItems}
-        contentContainerStyle={{ gap: 10, padding: 10 }}
-        columnWrapperStyle={{ gap: 10 }}
-        renderItem={({ item }) => (
-          <WorkoutCard
-            title={item.title}
-            image={item.image}
-            bgColor={item.bgColour}
-          />
-        )}
-      />
     </CustomSafeArea>
   );
 };

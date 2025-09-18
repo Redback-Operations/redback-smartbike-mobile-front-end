@@ -3,150 +3,82 @@ import React, { useEffect, useContext, useState } from "react";
 import Avatar from "@/components/Avatar";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { AuthContext } from "@/context/authContext";
+import { useTheme } from "@/context/ThemeContext";
+
 import CustomSafeArea from "@/components/CustomSafeArea";
-
-const EditProfile = () => {
+const editProfile = () => {
   const { user, setUser } = useContext(AuthContext);
-  const [formData, setFormData] = useState({ username: "", password: "" });
-  const [passwordStrength, setPasswordStrength] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👀 toggle state
-
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        username: user.username || "",
-        password: "",
-      });
-    }
-  }, [user]);
-
-  // Function to check password strength
-  const checkPasswordStrength = (password) => {
-    if (!password) return "";
-
-    let strength = "";
-    if (password.length < 6) {
-      strength = "Weak ❌ (Too short)";
-    } else if (
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-        password
-      )
-    ) {
-      strength = "Strong ✅";
-    } else {
-      strength = "Medium ⚠️ (Add symbols, numbers, and uppercase)";
-    }
-
-    setPasswordStrength(strength);
-  };
+  const { isDarkMode } = useTheme();
+  const [formData, setFormData] = useState({ username: "", email: "" });
+  // useEffect(() => {
+  //   setUser({ id: 1, username: "Jordan", email: "jordan@gmail.com" });
+  // }, []);
 
   const submitChanges = async () => {
-    try {
-      if (!formData.username || !formData.password) {
-        alert("Please fill in all fields");
-        return;
-      }
-
-      if (passwordStrength !== "Strong ✅") {
-        alert("Password must be strong before updating profile!");
-        return;
-      }
-
-      const updatedUser = {
-        ...user,
-        username: formData.username,
-      };
-
-      // Replace with real API call if needed
-      // await api.put(`/user/${user.id}`, updatedUser);
-
-      setUser(updatedUser);
-      alert("Profile updated successfully!");
-    } catch (error) {
-      console.error("Update failed:", error);
-      alert("Something went wrong.");
-    }
+    //logic to submit changes and update account details.
   };
 
+  // Theme-aware colors
+  const bgColor = isDarkMode ? "black" : "white";
+  const textColor = isDarkMode ? "text-white" : "text-gray-800";
+  const inputBgColor = isDarkMode ? "bg-gray-800" : "bg-white";
+  const borderColor = isDarkMode ? "border-gray-600" : "border-gray-400";
+
   return (
-    <CustomSafeArea>
-      <View>
-        <Avatar
-          size={100}
-          className="self-center"
-          icon={<AntDesign name="edit" size={14} color="white" />}
-          iconBgColour={"bg-blue-500"}
-        />
-      </View>
-
-      {user && (
-        <View className="flex-1 gap-4 p-4">
-          {/* Username */}
-          <View className="gap-2">
-            <Text>Username:</Text>
-            <TextInput
-              value={formData.username}
-              onChangeText={(text) =>
-                setFormData({ ...formData, username: text })
-              }
-              className="border border-gray-400 p-2 rounded-xl"
-              placeholder="Username"
-            />
-          </View>
-
-          {/* Password */}
-          <View className="gap-2">
-            <Text>Password:</Text>
-            <View className="flex-row items-center border border-gray-400 p-2 rounded-xl">
+    <CustomSafeArea applyTopInset={false} bgColour={bgColor}>
+      <View className={`flex-1 bg-${bgColor}`}>
+        <View>
+          <Avatar
+            size={100}
+            className="self-center"
+            icon={<AntDesign name="edit" size={14} color="white" />}
+            iconBgColour={"bg-blue-500"}
+          />
+        </View>
+        {user && (
+          <View className="flex-1 gap-4 p-4">
+            <View className="gap-2 ">
+              <Text className={textColor}>Username:</Text>
               <TextInput
-                secureTextEntry={!showPassword}
-                value={formData.password}
-                onChangeText={(text) => {
-                  setFormData({ ...formData, password: text });
-                  checkPasswordStrength(text);
-                }}
-                className="flex-1"
-                placeholder="********"
+                value={formData.username}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, username: text })
+                }
+                className={`border ${borderColor} p-2 rounded-xl ${inputBgColor} ${textColor}`}
+                placeholder={user.username ? user.username : "Username"}
+                placeholderTextColor={isDarkMode ? "#9CA3AF" : "#6B7280"}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <AntDesign
-                  name={showPassword ? "eye" : "eyeo"}
-                  size={20}
-                  color="gray"
-                />
-              </TouchableOpacity>
+            </View>
+            <View className="gap-2">
+              <Text className={textColor}>Password:</Text>
+              <TextInput
+                secureTextEntry
+                value={formData.password}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, password: text })
+                }
+                className={`border ${borderColor} p-2 rounded-xl ${inputBgColor} ${textColor}`}
+                placeholder={"*********"}
+                placeholderTextColor={isDarkMode ? "#9CA3AF" : "#6B7280"}
+              />
             </View>
 
-            {passwordStrength ? (
-              <Text
-                className={`text-sm ${
-                  passwordStrength.includes("Strong")
-                    ? "text-green-600"
-                    : passwordStrength.includes("Medium")
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}
-              >
-                {passwordStrength}
-              </Text>
-            ) : null}
-          </View>
+            <Text className={textColor}>{formData.username}</Text>
+            <Text className={textColor}>{formData.password}</Text>
 
-          {/* Submit Button */}
-          <TouchableOpacity
-            onPress={submitChanges}
-            className="bg-brand-purple p-4 rounded-xl mt-auto"
-          >
-            <Text className="text-white text-center font-semibold">
-              Submit Changes
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
+            <TouchableOpacity
+              onPress={submitChanges}
+              className={`bg-brand-purple p-4 rounded-xl mt-auto `}
+            >
+              <Text className="text-white text-center font-semibold">
+                Submit Changes
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </View>
     </CustomSafeArea>
   );
 };
 
-export default EditProfile;
-
-
+export default editProfile;

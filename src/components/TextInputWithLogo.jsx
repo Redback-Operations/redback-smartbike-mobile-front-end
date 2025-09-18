@@ -10,6 +10,7 @@ const TextInputWithLogo = ({
   id,
 }) => {
   const [focus, setFocus] = useState(false);
+  
   return (
     <View
       className={`flex flex-row relative items-center transition-all duration-500 border gap-4 px-6 py-4 rounded-full ${
