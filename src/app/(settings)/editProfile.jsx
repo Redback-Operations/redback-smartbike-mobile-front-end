@@ -11,7 +11,7 @@ const EditProfile = () => {
   const { inlineStyles, theme } = useThemeStyles();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [passwordStrength, setPasswordStrength] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // 👀 toggle state
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -22,24 +22,22 @@ const EditProfile = () => {
     }
   }, [user]);
 
-  // Function to check password strength
-  const checkPasswordStrength = (password) => {
-    if (!password) return "";
+  // Password strength checker
+  const checkPasswordStrength = (password: string) => {
+    if (!password) return setPasswordStrength("");
 
-    let strength = "";
     if (password.length < 6) {
-      strength = "Weak ❌ (Too short)";
-    } else if (
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/.test(
-        password
-      )
-    ) {
-      strength = "Strong ✅";
-    } else {
-      strength = "Medium ⚠️ (Add symbols, numbers, and uppercase)";
+      return setPasswordStrength("Weak ❌ (Too short)");
     }
 
-    setPasswordStrength(strength);
+    const strongRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
+    if (strongRegex.test(password)) {
+      setPasswordStrength("Strong ✅");
+    } else {
+      setPasswordStrength("Medium ⚠️ (Add symbols, numbers, and uppercase)");
+    }
   };
 
   const submitChanges = async () => {
@@ -59,7 +57,7 @@ const EditProfile = () => {
         username: formData.username,
       };
 
-      // Replace with real API call if needed
+      // TODO: replace with real API call
       // await api.put(`/user/${user.id}`, updatedUser);
 
       setUser(updatedUser);
@@ -168,5 +166,3 @@ const EditProfile = () => {
 };
 
 export default EditProfile;
-
-
