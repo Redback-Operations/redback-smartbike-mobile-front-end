@@ -17,9 +17,9 @@ import { router } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
 
 const options = [
-  "Poor service",
-  "I've found a better alternative",
-  "Privacy concerns",
+  "Poor Service",
+  "Found A Better Service",
+  "Privacy Concerns",
   "Other",
 ];
 
@@ -35,6 +35,10 @@ const bulletPoints = [
   },
 ];
 
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const SAVE_TA_URL = `${API_BASE_URL}/save_ta_message/`;
+
 const deleteAccount = () => {
   const { user } = useContext(AuthContext);
   //sets the reasonEnum to the ENUM value expected by backend
@@ -48,6 +52,52 @@ const deleteAccount = () => {
     moreInfo: "",
     reasonEnum: 0,
   });
+
+  //sends the terminate account message to the server
+  const handleConfirmTA = async (inData) => {
+    //PRODUCTION CODE
+    console.log(`Sending to ${SAVE_TA_URL}`);
+    console.log(`${JSON.stringify(user)}`)
+
+    if (inData.reasonEnum == 0) {
+      inData.reason = "Other"; inData.reasonEnum = 3;
+    }
+
+    //currently disabled as this endpoint requires JSON version
+    // const bodyData = new FormData();
+    // bodyData.append("reason", inData.reason);
+    // bodyData.append("message_body", inData.moreInfo);
+    //console.log(Object.fromEntries(bodyData.entries())); //remove this in PR
+
+    const bodyData = {
+      reason: String(inData.reason),
+      message_body: String(inData.moreInfo ?? ""),
+    };
+    console.log(JSON.stringify(bodyData)); //remove this in PR
+
+    const response = await fetch(`${SAVE_TA_URL}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify(bodyData), //forced JSON until we update backend
+    });
+
+    switch (response.status) {
+      case 400:
+        alert("Invalid message!");
+        return;
+      case 201:
+        //setDeleteSuccessful(true); //function doesn't exist - someone fix this
+        router.push("/confirmIntent");
+        break;
+      default:
+        alert("Unknown Error!");
+        return;  
+    }
+  }
+
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -80,6 +130,7 @@ const deleteAccount = () => {
               multiline={true}
               style={{ textAlignVertical: "top" }}
               numberOfLines={5}
+              onChangeText={(text) => setFormData(prev => ({ ...prev, moreInfo: text }))}
               placeholder="Comments..."
               className="text-black h-36  box-border border-[1.5px] rounded-xl p-4 flex items-center justify-center border-gray-200 focus:border-brand-purple"
             />
@@ -102,7 +153,9 @@ const deleteAccount = () => {
         </View>
         <View className="p-4 mt-auto">
           <TouchableOpacity
-            onPress={() => router.push("/confirmIntent")}
+            onPress={() => 
+              handleConfirmTA(formData)//router.push("/confirmIntent") 
+            }
             className="bg-red-500  rounded-full p-4"
           >
             <Text className="text-white font-semibold text-center">

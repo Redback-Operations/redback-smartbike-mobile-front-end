@@ -18,40 +18,53 @@ import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "@/context/authContext";
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const LOGIN_URL = `${API_BASE_URL}/login/`;
+
 const index = () => {
   const { setUser } = useContext(AuthContext);
+  const [loginData, setLoginData] = useState({ email: "", password: "" });
+
   const handleLogin = async () => {
     // production code
-    // const response = await fetch(`http://0.0.0.0:8000/login/`, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify(loginData),
-    // });
-    // switch (response.status) {
-    //   case 404:
-    //     alert("Invalid credentials: email doesn't exist");
-    //     break;
-    //   case 401:
-    //     alert("Invalid credentials: incorrect password");
-    //     break;
-    //   case 200:
-    //     const data = await response.json();
-    //     setUser({
-    //       id: data.id,
-    //       username: data.account_details[0].username,
-    //       email: data.account_details[0].email,
-    //     });
-    //     router.replace("/home");
-    //     break;
-    // }
+
+    const formData = new FormData();
+    formData.append("email", loginData.email);
+    formData.append("password", loginData.password);
+
+    console.log(`Sending to ${LOGIN_URL}`)
+    console.log(Object.fromEntries(formData.entries())); //remove this in PR
+
+    const response = await fetch(`${LOGIN_URL}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json"
+      },
+      body: formData,
+    });
+    switch (response.status) {
+      case 404:
+        alert("Invalid credentials: email doesn't exist");
+        break;
+      case 401:
+        alert("Invalid credentials: incorrect password");
+        break;
+      case 200:
+        const data = await response.json();
+        console.log(JSON.stringify(data)); //remove this in PR
+        setUser({
+          id: data.id,
+          username: data.account_details[0].username,
+          email: data.account_details[0].email,
+        });
+        router.replace("/home");
+        break;
+    }
     // dev code
-    router.replace("/home");
+    //router.replace("/home");
   };
-  const [loginData, setLoginData] = useState({ email: "", password: "" });
-  const navigation = useNavigation();
+
+  //const navigation = useNavigation();
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>

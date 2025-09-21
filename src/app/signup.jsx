@@ -18,6 +18,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "@/context/authContext";
 import * as ImagePicker from "expo-image-picker"; // ✅ added
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const SIGNUP_URL = `${API_BASE_URL}/signup/`;
+
 const SignUp = () => {
   const { setUser } = useContext(AuthContext);
   const [userData, setUserData] = useState({
@@ -43,53 +46,55 @@ const SignUp = () => {
 
   const handleSignup = async () => {
     //PRODUCTION CODE
-    // if (!userData.username || !userData.email || !userData.password) {
-    //   alert("Please complete all fields");
-    //   return;
-    // }
+    if (!userData.username || !userData.email || !userData.password) {
+      alert("Please complete all fields");
+      return;
+    }
 
-    // const formData = new FormData();
-    // formData.append("username", userData.username);
-    // formData.append("email", userData.email);
-    // formData.append("password", userData.password);
+    const formData = new FormData();
+    formData.append("username", userData.username);
+    formData.append("email", userData.email);
+    formData.append("password", userData.password);
 
-    // if (photo) {
-    //   const filename = photo.split("/").pop();
-    //   const match = /\.(\w+)$/.exec(filename ?? "");
-    //   const type = match ? `image/${match[1]}` : `image`;
-    //   formData.append("photo", { uri: photo, name: filename, type });
-    // }
+    if (photo) {
+      const filename = photo.split("/").pop();
+      const match = /\.(\w+)$/.exec(filename ?? "");
+      const type = match ? `image/${match[1]}` : `image`;
+      formData.append("photo", { uri: photo, name: filename, type });
+    }
 
-    // const response = await fetch(`http://0.0.0.0:8000/signup/`, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "multipart/form-data",
-    //   },
-    //   body: formData,
-    // });
+    console.log(`Sending to ${SIGNUP_URL}`)
+    console.log(Object.fromEntries(formData.entries())); //remove this in PR
+    const response = await fetch(`${SIGNUP_URL}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json"
+      },
+      body: formData,
+    });
 
-    // switch (response.status) {
-    //   case 409:
-    //     alert("This email or username already exists");
-    //     break;
-    //   case 400:
-    //     alert("An error occured");
-    //     break;
-    //   case 201:
-    //     const data = await response.json();
-    //     setUser({
-    //       id: data.id,
-    //       username: data.username,
-    //       email: data.email,
-    //       photo: data.photo ?? null, // ✅ store server photo url
-    //     });
-    //     router.replace("/home");
-    //     break;
-    // }
+    switch (response.status) {
+      case 409:
+        alert("This email or username already exists");
+        break;
+      case 400:
+        alert("An error occured");
+        break;
+      case 201:
+        const data = await response.json();
+        console.log(JSON.stringify(data)); //remove this in PR
+        setUser({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          photo: data.photo ?? null, // ✅ store server photo url
+        });
+        router.replace("/home")
+        break;
+    }
 
     //DEV CODE
-    router.replace("/home");
+    //router.replace("/home");
   };
 
   return (

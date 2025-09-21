@@ -6,23 +6,71 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import DropDown from "@/components/DropDown";
+import { AuthContext } from "@/context/authContext";
+import { Link, router, useNavigation } from "expo-router";
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const MESSAGE_URL = `${API_BASE_URL}/messages/`;
 const options = ["General Equiry", "Technical Support", "Billing", "Other"];
 
 const Contact = () => {
+   const { user } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     subject: "",
     category: "Select...",
     email: "",
     message: "",
+    categoryEnum: 0
   });
 
   const handleCategorySelect = (option) => {
-    setFormData({ ...formData, category: option });
+    const index = options.indexOf(option);
+    setFormData({ ...formData, categoryEnum: index, category: option });
   };
+
+  const handleContact = async (inData) => {
+
+    
+    console.log(`${JSON.stringify(formData)}`) //remove this in PR
+    if (formData.categoryEnum == 0) {
+      formData.category = options[3]; formData.categoryEnum = 3;
+    }
+
+    const bodyData = new FormData();
+    bodyData.append("id", user.id)
+    bodyData.append("email", formData.email);
+    bodyData.append("subject", formData.subject);
+    bodyData.append("category", formData.category);
+    bodyData.append("message_body", formData.message);
+    console.log(Object.fromEntries(bodyData.entries())); //remove this in PR
+
+    const response = await fetch(`${MESSAGE_URL}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+      },
+      body: bodyData,
+    });
+
+    switch (response.status) {
+      case 400:
+        alert("Invalid parameters!");
+        return;
+      case 404:
+        alert("User not found!");
+        return;
+      case 201:
+         alert("Message sent!");
+        router.replace("/contact");
+        break;
+      default:
+        alert("Unknown Error!");
+        return;  
+    }
+  }
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -72,7 +120,8 @@ const Contact = () => {
               style={{ textAlignVertical: "top" }}
             />
             <View className=" flex-grow items-center justify-center">
-              <TouchableOpacity className="text-white  bg-brand-purple w-full py-4 rounded-xl text-xl">
+              <TouchableOpacity className="text-white  bg-brand-purple w-full py-4 rounded-xl text-xl"
+                          onPress={() => handleContact()}>
                 <Text className="text-white font-semibold text-center">
                   Send
                 </Text>
