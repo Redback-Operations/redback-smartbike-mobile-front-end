@@ -11,6 +11,17 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomSafeArea from "@/components/CustomSafeArea";
 
+// Motivational quotes
+const quotes = [
+  "Push harder than yesterday if you want a different tomorrow 🚴",
+  "Don’t stop when you’re tired. Stop when you’re done 💪",
+  "It never gets easier, you just get stronger 🌟",
+  "Small steps every day lead to big results 🔥",
+];
+
+const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+
 const homeTiles = [
   {
     title: "Connect",
@@ -19,7 +30,7 @@ const homeTiles = [
   {
     title: "Start workout",
     link: "",
-    icon: <MaterialCommunityIcons name={"bike"} size={42} color="#EB7363" />,
+    icon: <MaterialCommunityIcons name={"bike"} size={60} color="#EB7363" />,
   },
   {
     title: "Groups",
@@ -52,9 +63,22 @@ const Home = () => {
       <View className="px-4 flex-1">
         {/* Header */}
         <View className="flex-row justify-between items-center my-4">
-          <WelcomeMessage name={user.username ? user.username : "Username"} />
+          <WelcomeMessage name={user.username ? user.username : "Welcome Rider"} />
           <Avatar size={50} />
         </View>
+        {/* Motivational Quote at Top */}
+        <Text
+          style={{
+            color: "white",
+            fontSize: 18,
+            fontStyle: "italic",
+            marginBottom: 12,
+            textAlign: "center",
+          }}
+        >
+          {randomQuote}
+        </Text>
+
 
         {/* Last Week Activity */}
         <LastWeekActivity />

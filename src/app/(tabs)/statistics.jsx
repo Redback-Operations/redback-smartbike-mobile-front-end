@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,14 +8,14 @@ import {
   ScrollView,
   SafeAreaView,
   StatusBar,
-} from 'react-native';
-import { BarChart } from 'react-native-chart-kit';
+} from "react-native";
+import { BarChart } from "react-native-chart-kit";
 
-const screenWidth = Dimensions.get('window').width;
+const screenWidth = Dimensions.get("window").width;
 
 const chartConfig = {
-  backgroundGradientFrom: '#121212',
-  backgroundGradientTo: '#1a1a1a',
+  backgroundGradientFrom: "#121212",
+  backgroundGradientTo: "#1a1a1a",
   decimalPlaces: 2,
   color: (opacity = 1) => `rgba(255, 99, 71, ${opacity})`,
   labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
@@ -23,27 +23,27 @@ const chartConfig = {
     borderRadius: 16,
   },
   propsForBackgroundLines: {
-    strokeDasharray: '',
-    stroke: 'rgba(255,255,255,0.1)',
+    strokeDasharray: "",
+    stroke: "rgba(255,255,255,0.1)",
   },
 };
 
-// 👉 Replace this with the EXACT values from your uploaded workout summary
+// Mock weekly data
 const mockData = [
-  { day: 'Mon', minutes: 22 },
-  { day: 'Tue', minutes: 48 },
-  { day: 'Wed', minutes: 26 },
-  { day: 'Thu', minutes: 55 },
-  { day: 'Fri', minutes: 99 },
-  { day: 'Sat', minutes: 35 },
-  { day: 'Sun', minutes: 20 },
+  { day: "Mon", minutes: 22 },
+  { day: "Tue", minutes: 48 },
+  { day: "Wed", minutes: 26 },
+  { day: "Thu", minutes: 55 },
+  { day: "Fri", minutes: 99 },
+  { day: "Sat", minutes: 35 },
+  { day: "Sun", minutes: 20 },
 ];
 
-// Workout summary stats (still static for distance, calories, HR)
+// Workout summary stats (static for now)
 const workoutSummary = {
-  totalDistance: '92.4 km',
+  totalDistance: "92.4 km",
   calories: 3250,
-  avgHeartRate: '148 bpm',
+  avgHeartRate: "148 bpm",
 };
 
 export default function RedbackWeeklySummary() {
@@ -58,23 +58,35 @@ export default function RedbackWeeklySummary() {
   }, []);
 
   const totalMinutes = rideData.reduce((sum, d) => sum + d.minutes, 0);
-  const activeDays = rideData.filter(d => d.minutes > 0).length;
+  const activeDays = rideData.filter((d) => d.minutes > 0).length;
 
   // Convert minutes → hours + minutes
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
   const formattedTotalTime = `${hours}h ${minutes}m`;
 
+  // Best day calculation
+  const bestDay =
+    rideData.length > 0
+      ? rideData.reduce((prev, current) =>
+        current.minutes > prev.minutes ? current : prev
+      )
+      : { day: "-", minutes: 0 };
+
+  // Weekly trend mock
+  const lastWeekMinutes = 250; // mock value
+  const trend = totalMinutes > lastWeekMinutes ? "⬆️ Up" : "⬇️ Down";
+
   const chartData = {
-    labels: rideData.map(d => d.day),
+    labels: rideData.map((d) => d.day),
     datasets: [
       {
-        data: rideData.map(d => d.minutes),
+        data: rideData.map((d) => d.minutes),
       },
     ],
   };
 
-  const customYLabels = ['0.00', '24.75', '49.50', '74.25', '99.00'];
+  const customYLabels = ["0.00", "24.75", "49.50", "74.25", "99.00"];
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -85,7 +97,12 @@ export default function RedbackWeeklySummary() {
         </Text>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#ff4500" style={{ marginTop: 40 }} />
+          <View style={{ marginTop: 40, alignItems: "center" }}>
+            <ActivityIndicator size="large" color="#ff4500" />
+            <Text style={{ color: "#fff", marginTop: 12 }}>
+              Crunching your rides...
+            </Text>
+          </View>
         ) : (
           <>
             <BarChart
@@ -98,23 +115,60 @@ export default function RedbackWeeklySummary() {
               showValuesOnTopOfBars
               withInnerLines
               withHorizontalLabels
-              segments={4} // 4 intervals -> 5 labels
+              segments={4}
               formatYLabel={(val) => {
-                const index = Math.round((val / 99) * 4); // map to 0-4
-                return customYLabels[index] || '';
+                const index = Math.round((val / 99) * 4);
+                return customYLabels[index] || "";
               }}
             />
 
+            {/* Total Minutes + Active Days */}
             <View style={styles.stats}>
-  <Text style={styles.statText}>
-    🕒 Total Minutes: <Text style={styles.statHighlight}>{totalMinutes} min</Text>
-  </Text>
-  <Text style={styles.statText}>
-    📅 Active Days: <Text style={styles.statHighlight}>{activeDays} days</Text>
-  </Text>
-</View>
+              <Text style={styles.statText}>
+                🕒 Total Time:{" "}
+                <Text style={styles.statHighlight}>
+                  {formattedTotalTime} ({totalMinutes} min)
+                </Text>
+              </Text>
+              <Text style={styles.statText}>
+                📅 Active Days:{" "}
+                <Text style={styles.statHighlight}>{activeDays} days</Text>
+              </Text>
+            </View>
 
+            {/* Workout Summary */}
+            <View style={styles.summaryBox}>
+              <Text style={styles.summaryText}>
+                🚴 Total Distance:{" "}
+                <Text style={styles.summaryHighlight}>
+                  {workoutSummary.totalDistance}
+                </Text>
+              </Text>
+              <Text style={styles.summaryText}>
+                🔥 Calories Burned:{" "}
+                <Text style={styles.summaryHighlight}>
+                  {workoutSummary.calories}
+                </Text>
+              </Text>
+              <Text style={styles.summaryText}>
+                ❤️ Avg Heart Rate:{" "}
+                <Text style={styles.summaryHighlight}>
+                  {workoutSummary.avgHeartRate}
+                </Text>
+              </Text>
+            </View>
 
+            {/* Best Day */}
+            <View style={styles.bestDayBox}>
+              <Text style={styles.bestDayText}>
+                🏆 Best Day: {bestDay.day} ({bestDay.minutes} min)
+              </Text>
+            </View>
+
+            {/* Weekly Trend */}
+            <Text style={styles.trendText}>Weekly Trend: {trend}</Text>
+
+            {/* Motivation */}
             <View style={styles.motivationBox}>
               <Text style={styles.motivation}>
                 {activeDays >= 5
@@ -132,68 +186,99 @@ export default function RedbackWeeklySummary() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
     paddingTop: StatusBar.currentHeight || 20,
   },
   container: {
     paddingHorizontal: 15,
     paddingBottom: 40,
-    alignItems: 'center',
-    backgroundColor: '#121212',
+    alignItems: "center",
+    backgroundColor: "#121212",
   },
   title: {
     fontSize: 22,
-    fontWeight: 'bold',
-    color: '#ff4500',
+    fontWeight: "bold",
+    color: "#ff4500",
     marginTop: 20,
     marginBottom: 8,
-    textAlign: 'center',
+    textAlign: "center",
   },
   subtitle: {
     fontSize: 14,
-    color: '#ddd',
-    textAlign: 'center',
+    color: "#ddd",
+    textAlign: "center",
     marginBottom: 20,
   },
   chart: {
     borderRadius: 20,
     elevation: 3,
-    shadowColor: '#ff4500',
+    shadowColor: "#ff4500",
     shadowOpacity: 0.3,
     shadowRadius: 6,
     marginVertical: 8,
   },
   stats: {
     marginTop: 20,
-    width: '100%',
-    backgroundColor: '#1e1e1e',
+    width: "100%",
+    backgroundColor: "#1e1e1e",
     padding: 16,
     borderRadius: 14,
   },
   statText: {
-    color: '#ddd',
+    color: "#ddd",
     fontSize: 16,
     marginBottom: 8,
   },
   statHighlight: {
-    color: '#ff7f50',
-    fontWeight: '700',
+    color: "#ff7f50",
+    fontWeight: "700",
+  },
+  summaryBox: {
+    marginTop: 20,
+    backgroundColor: "#1e1e1e",
+    padding: 16,
+    borderRadius: 14,
+    width: "100%",
+  },
+  summaryText: {
+    color: "#ddd",
+    fontSize: 16,
+    marginBottom: 6,
+  },
+  summaryHighlight: {
+    color: "#ff7f50",
+    fontWeight: "700",
+  },
+  bestDayBox: {
+    marginTop: 20,
+    backgroundColor: "#262626",
+    padding: 14,
+    borderRadius: 12,
+    width: "100%",
+  },
+  bestDayText: {
+    color: "#ffa07a",
+    fontWeight: "600",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  trendText: {
+    marginTop: 10,
+    color: "#ccc",
+    fontSize: 14,
+    textAlign: "center",
   },
   motivationBox: {
     marginTop: 30,
-    backgroundColor: '#2a2a2a',
+    backgroundColor: "#2a2a2a",
     padding: 16,
     borderRadius: 14,
-    width: '100%',
+    width: "100%",
   },
   motivation: {
-    color: '#ff6347',
-    fontWeight: '600',
+    color: "#ff6347",
+    fontWeight: "600",
     fontSize: 16,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });
-
-
-
-

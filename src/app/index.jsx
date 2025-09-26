@@ -1,3 +1,5 @@
+
+import { ActivityIndicator } from "react-native";
 import {
   View,
   Text,
@@ -21,6 +23,18 @@ import { AuthContext } from "@/context/authContext";
 const index = () => {
   const { setUser } = useContext(AuthContext);
   const handleLogin = async () => {
+    setLoading(true); // start loading
+
+    try {
+      // simulate login delay (you can replace this with API call later)
+      setTimeout(() => {
+        setLoading(false); // stop loading
+        router.replace("/home"); // go to home page
+      }, 1500);
+    } catch (error) {
+      console.error("Login error:", error);
+      setLoading(false);
+    }
     // production code
     // const response = await fetch(`http://0.0.0.0:8000/login/`, {
     //   method: "POST",
@@ -51,6 +65,7 @@ const index = () => {
     router.replace("/home");
   };
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+  const [loading, setLoading] = useState(false);
   const navigation = useNavigation();
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
@@ -63,8 +78,11 @@ const index = () => {
               className="max-w-[130px] max-h-[130px] self-center mb-6"
               resizeMode="contain"
             />
-            <Text className="text-brand-navy text-center text-3xl font-bold">
+            <Text className="text-brand-navy text-center text-4xl font-regular tracking-wide">
               Redback Smart Bike
+            </Text>
+            <Text className="text-gray-600 text-center text-base mt-2">
+              Smarter rides, better health 🚴
             </Text>
             <View className="gap-4 my-12">
               <TextInputWithLogo
@@ -85,9 +103,14 @@ const index = () => {
             </View>
             <TouchableOpacity
               onPress={handleLogin}
-              className="bg-brand-purple w-2/3 self-center rounded-full px-6 py-4"
+              disabled={loading} // disable while loading
+              className="bg-brand-purple w-2/3 self-center rounded-full px-6 py-4 items-center justify-center"
             >
-              <Text className="text-white text-lg text-center">Sign in</Text>
+              {loading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text className="text-white text-xl font-bold text-center">Let's Ride</Text>
+              )}
             </TouchableOpacity>
 
             <Link className="self-center mt-6" href={"/forgot-password"}>
@@ -95,6 +118,7 @@ const index = () => {
             </Link>
           </View>
           <View className="flex flex-grow justify-center gap-4">
+            <Text className="text-white-500 text-center my-2">or continue with</Text>
             <View className="flex-row justify-between w-1/2 self-center">
               <LoginIcon image={require("@assets/apple-logo.png")} />
               <LoginIcon image={require("@assets/facebook.png")} />

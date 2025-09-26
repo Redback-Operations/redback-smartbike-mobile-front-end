@@ -1,11 +1,9 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, FlatList, Alert } from "react-native";
 import React, { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import CustomSafeArea from "@/components/CustomSafeArea";
-
 import Setting from "@/components/Setting";
 import { AuthContext } from "@/context/authContext";
 
@@ -15,19 +13,16 @@ const settingsArray = [
     link: "/myProfile",
     icon: <AntDesign name="user" size={18} color="black" />,
   },
-
   {
     title: "Edit Profile",
     link: "/editProfile",
     icon: <AntDesign name="user" size={18} color="black" />,
   },
-
   {
     title: "Contact Us",
     link: "/contact",
     icon: <AntDesign name="mail" size={18} color="black" />,
   },
-
   {
     title: "My Workout History",
     link: "/workoutHistory",
@@ -47,6 +42,7 @@ const settingsArray = [
     title: "Delete Account",
     link: "/deleteAccount",
     icon: <AntDesign name="deleteuser" size={18} color="black" />,
+    isDelete: true,
   },
   {
     title: "Logout",
@@ -58,8 +54,35 @@ const settingsArray = [
 
 const settings = () => {
   const { user } = useContext(AuthContext);
+
+  // Handle confirmation
+  const handleAction = (item) => {
+    if (item.isLogOut) {
+      Alert.alert(
+        "Confirm Logout",
+        "Are you sure you want to log out?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Logout", style: "destructive", onPress: () => console.log("Logged out") },
+        ]
+      );
+    } else if (item.isDelete) {
+      Alert.alert(
+        "Confirm Delete",
+        "This action will permanently delete your account. Continue?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Delete", style: "destructive", onPress: () => console.log("Account deleted") },
+        ]
+      );
+    } else {
+      // Navigate normally
+      console.log(`Navigate to ${item.link}`);
+    }
+  };
+
   return (
-    <View className="flex-1 ">
+    <View className="flex-1">
       <LinearGradient colors={["#994D74", "#3A1C72"]}>
         <SafeAreaView className="h-[350px] flex justify-center items-center">
           <Avatar size={100} />
@@ -68,6 +91,7 @@ const settings = () => {
           </Text>
         </SafeAreaView>
       </LinearGradient>
+
       <View className="h-full relative -top-14 rounded-[48px] bg-white py-8 px-6">
         <Text className="text-3xl font-bold text-center">Settings</Text>
 
@@ -80,6 +104,7 @@ const settings = () => {
               settingTitle={item.title}
               link={item.link}
               icon={item.icon}
+              onPress={() => handleAction(item)} //  Added confirmation
             />
           )}
         />
