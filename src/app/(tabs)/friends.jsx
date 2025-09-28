@@ -3,6 +3,7 @@ import { View, Text, FlatList, TouchableOpacity } from "react-native";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 // Mock friend activity data with gradient colors
 const initialData = [
@@ -79,27 +80,37 @@ function ActivityCard({ a }) {
 
 export default function Friends() {
   const [data] = useState(initialData);
+  const { inlineStyles, theme } = useThemeStyles();
 
   return (
-    <CustomSafeArea applyTopInset={false} className="flex-1 bg-white">
-      {/* Page header */}
-      <View className="flex-row justify-between items-center m-2 mt-8">
-        <Text className="text-brand-purple my-6 font-bold text-4xl">
-          Friends Activity
-        </Text>
-        <TouchableOpacity onPress={() => {}}>
-          <FontAwesome6 name="user-plus" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
+    <View style={inlineStyles.background} className="flex-1">
+      <CustomSafeArea applyTopInset={false}>
+        {/* Page header */}
+        <View className="flex-row justify-between items-center m-2 mt-8">
+          <Text 
+            style={{ 
+              color: theme.text,
+              marginVertical: 24,
+              fontWeight: 'bold',
+              fontSize: 36
+            }}
+          >
+            Friends Activity
+          </Text>
+          <TouchableOpacity onPress={() => {}}>
+            <FontAwesome6 name="user-plus" size={24} color={theme.text} />
+          </TouchableOpacity>
+        </View>
 
-      {/* Gradient friend activity list */}
-      <FlatList
-        data={data}
-        keyExtractor={(x) => x.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 24 }}
-        renderItem={({ item }) => <ActivityCard a={item} />}
-      />
-    </CustomSafeArea>
+        {/* Gradient friend activity list */}
+        <FlatList
+          data={data}
+          keyExtractor={(x) => x.id}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 24 }}
+          renderItem={({ item }) => <ActivityCard a={item} />}
+        />
+      </CustomSafeArea>
+    </View>
   );
 }

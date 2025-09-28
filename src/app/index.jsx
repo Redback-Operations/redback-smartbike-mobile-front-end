@@ -17,9 +17,11 @@ import { Link, router, useNavigation } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "@/context/authContext";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const index = () => {
   const { setUser } = useContext(AuthContext);
+  const { inlineStyles, theme } = useThemeStyles();
   const handleLogin = async () => {
     // production code
     // const response = await fetch(`http://0.0.0.0:8000/login/`, {
@@ -57,19 +59,25 @@ const index = () => {
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
         <StatusBar barStyle={"light-content"} />
         <SafeAreaView>
-          <View className="bg-white max-h-[78%] py-6 m-6 rounded-[48px] flex justify-center px-4">
+          <View 
+            style={[inlineStyles.card, { maxHeight: '78%' }]} 
+            className="py-6 m-6 rounded-[48px] flex justify-center px-4"
+          >
             <Image
               source={require("@assets/redback-logo.png")}
               className="max-w-[130px] max-h-[130px] self-center mb-6"
               resizeMode="contain"
             />
-            <Text className="text-brand-navy text-center text-3xl font-bold">
+            <Text 
+              style={{ color: theme.secondary }} 
+              className="text-center text-3xl font-bold"
+            >
               Redback Smart Bike
             </Text>
             <View className="gap-4 my-12">
               <TextInputWithLogo
                 id={"email"}
-                logo={<AntDesign name="mail" size={24} color="black" />}
+                logo={<AntDesign name="mail" size={24} color={theme.text} />}
                 placeholder={"example@gmail.com"}
                 data={loginData}
                 setData={setLoginData}
@@ -77,7 +85,7 @@ const index = () => {
               <TextInputWithLogo
                 id={"password"}
                 secure
-                logo={<AntDesign name="lock1" size={28} color="black" />}
+                logo={<AntDesign name="lock1" size={28} color={theme.text} />}
                 placeholder={"Enter your password"}
                 data={loginData}
                 setData={setLoginData}
@@ -91,7 +99,7 @@ const index = () => {
             </TouchableOpacity>
 
             <Link className="self-center mt-6" href={"/forgot-password"}>
-              <Text>Forgot password?</Text>
+              <Text style={inlineStyles.text}>Forgot password?</Text>
             </Link>
           </View>
           <View className="flex flex-grow justify-center gap-4">
@@ -103,7 +111,10 @@ const index = () => {
             <Text className="text-white text-center">
               Dont have an account?<Text> </Text>
               <Link href={"/signup"}>
-                <Text className="text-brand-purple font-semibold">
+                <Text 
+                  style={{ color: theme.primary }} 
+                  className="font-semibold"
+                >
                   Sign up here
                 </Text>
               </Link>

@@ -4,6 +4,7 @@ import WorkoutCard from "@/components/WorkoutCard";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { router } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const workoutItems = [
   {
@@ -59,31 +60,38 @@ const workoutItems = [
 ];
 
 const workouts = () => {
+  const { inlineStyles, theme } = useThemeStyles();
+  
   return (
-    <CustomSafeArea applyTopInset={false} className="flex-1 bg-white">
-      <View className="flex-row justify-between items-center m-2">
-        <Text className="text-brand-purple my-6 font-bold text-4xl">
-          Track your fitness
-        </Text>
-        <TouchableOpacity onPress={() => router.push("/scheduleWorkout")}>
-          <FontAwesome6 name="calendar-plus" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-      <FlatList
-        numColumns={2}
-        showsVerticalScrollIndicator={false}
-        data={workoutItems}
-        contentContainerStyle={{ gap: 10, padding: 10 }}
-        columnWrapperStyle={{ gap: 10 }}
-        renderItem={({ item }) => (
-          <WorkoutCard
-            title={item.title}
-            image={item.image}
-            bgColor={item.bgColour}
-          />
-        )}
-      />
-    </CustomSafeArea>
+    <View style={inlineStyles.background} className="flex-1">
+      <CustomSafeArea applyTopInset={false}>
+        <View className="flex-row justify-between items-center m-2">
+          <Text 
+            style={{ color: theme.primary }} 
+            className="my-6 font-bold text-4xl"
+          >
+            Track your fitness
+          </Text>
+          <TouchableOpacity onPress={() => router.push("/scheduleWorkout")}>
+            <FontAwesome6 name="calendar-plus" size={24} color={theme.text} />
+          </TouchableOpacity>
+        </View>
+        <FlatList
+          numColumns={2}
+          showsVerticalScrollIndicator={false}
+          data={workoutItems}
+          contentContainerStyle={{ gap: 10, padding: 10 }}
+          columnWrapperStyle={{ gap: 10 }}
+          renderItem={({ item }) => (
+            <WorkoutCard
+              title={item.title}
+              image={item.image}
+              bgColor={item.bgColour}
+            />
+          )}
+        />
+      </CustomSafeArea>
+    </View>
   );
 };
 

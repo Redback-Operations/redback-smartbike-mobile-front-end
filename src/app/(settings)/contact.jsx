@@ -9,10 +9,12 @@ import {
 import React, { useState } from "react";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import DropDown from "@/components/DropDown";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const options = ["General Equiry", "Technical Support", "Billing", "Other"];
 
 const Contact = () => {
+  const { theme, inlineStyles } = useThemeStyles();
   const [formData, setFormData] = useState({
     subject: "",
     category: "Select...",
@@ -30,14 +32,27 @@ const Contact = () => {
       }}
     >
       <CustomSafeArea>
-        <View className="flex justify-center h-full px-4">
-          <Text className="text-brand-purple text-3xl my-8 font-bold text-center">
+        <View style={[inlineStyles.background, { flex: 1, justifyContent: 'center', paddingHorizontal: 16 }]}>
+          <Text style={{
+            color: theme.text,
+            fontSize: 30,
+            marginVertical: 32,
+            fontWeight: 'bold',
+            textAlign: 'center'
+          }}>
             How can we help?
           </Text>
-          <View className="gap-4 my-4 flex-1 ">
+          <View style={{ gap: 16, marginVertical: 16, flex: 1 }}>
             <TextInput
-              className="text-black bg-white box-border border-[1.5px] rounded-xl p-4 flex items-center justify-center border-gray-200 focus:border-brand-purple"
-              placeholderTextColor={"gray"}
+              style={{
+                color: theme.text,
+                backgroundColor: theme.surface,
+                borderWidth: 1.5,
+                borderRadius: 12,
+                padding: 16,
+                borderColor: theme.border,
+              }}
+              placeholderTextColor={theme.textSecondary}
               placeholder="Subject"
               value={formData.subject}
               onChangeText={(text) =>
@@ -53,27 +68,52 @@ const Contact = () => {
               handlePress={handleCategorySelect}
             ></DropDown>
             <TextInput
-              className="text-black -z-10 bg-white box-border border-[1.5px] rounded-xl p-4 flex items-center justify-center border-gray-200 focus:border-brand-purple"
-              placeholderTextColor={"gray"}
+              style={{
+                color: theme.text,
+                backgroundColor: theme.surface,
+                borderWidth: 1.5,
+                borderRadius: 12,
+                padding: 16,
+                borderColor: theme.border,
+              }}
+              placeholderTextColor={theme.textSecondary}
               placeholder="Email"
               value={formData.email}
               onChangeText={(text) => setFormData({ ...formData, email: text })}
               autoCapitalize="none"
             />
             <TextInput
-              className="text-black bg-white -z-10 box-border border-[1.5px] h-1/2  rounded-xl p-4  border-gray-200 focus:border-brand-purple"
-              placeholderTextColor={"gray"}
+              style={{
+                color: theme.text,
+                backgroundColor: theme.surface,
+                borderWidth: 1.5,
+                borderRadius: 12,
+                padding: 16,
+                borderColor: theme.border,
+                height: 120,
+                textAlignVertical: "top"
+              }}
+              placeholderTextColor={theme.textSecondary}
               placeholder="Message"
               value={formData.message}
               onChangeText={(text) =>
                 setFormData({ ...formData, message: text })
               }
               multiline={true}
-              style={{ textAlignVertical: "top" }}
             />
-            <View className=" flex-grow items-center justify-center">
-              <TouchableOpacity className="text-white  bg-brand-purple w-full py-4 rounded-xl text-xl">
-                <Text className="text-white font-semibold text-center">
+            <View style={{ flexGrow: 1, alignItems: 'center', justifyContent: 'center' }}>
+              <TouchableOpacity style={{
+                backgroundColor: theme.primary,
+                width: '100%',
+                paddingVertical: 16,
+                borderRadius: 12
+              }}>
+                <Text style={{
+                  color: 'white',
+                  fontWeight: '600',
+                  textAlign: 'center',
+                  fontSize: 18
+                }}>
                   Send
                 </Text>
               </TouchableOpacity>

@@ -11,9 +11,11 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Link } from "expo-router";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
+  const { inlineStyles, theme } = useThemeStyles();
 
   const handleResetPassword = () => {
     if (!email) {
@@ -28,21 +30,36 @@ const ForgotPassword = () => {
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
         <SafeAreaView className="flex-1 justify-center px-6">
-          <View className="bg-white rounded-[32px] p-8">
-            <Text className="text-3xl font-bold text-center text-brand-purple mb-4">
+          <View 
+            style={inlineStyles.card} 
+            className="rounded-[32px] p-8"
+          >
+            <Text 
+              style={{ color: theme.primary }} 
+              className="text-3xl font-bold text-center mb-4"
+            >
               Forgot Password
             </Text>
-            <Text className="text-gray-600 text-center mb-6">
-              Enter your registered email below and we’ll send you instructions
+            <Text 
+              style={{ color: theme.textSecondary }} 
+              className="text-center mb-6"
+            >
+              Enter your registered email below and we'll send you instructions
               to reset your password.
             </Text>
 
             <TextInput
               placeholder="Enter your email"
+              placeholderTextColor={theme.textSecondary}
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
-              className="border border-gray-300 rounded-xl px-4 py-3 mb-6"
+              style={{
+                backgroundColor: theme.surface,
+                borderColor: theme.border,
+                color: theme.text,
+              }}
+              className="border rounded-xl px-4 py-3 mb-6"
             />
 
             <TouchableOpacity
@@ -56,7 +73,10 @@ const ForgotPassword = () => {
 
             <Link href="/" asChild>
               <TouchableOpacity className="mt-6">
-                <Text className="text-brand-purple text-center">
+                <Text 
+                  style={{ color: theme.primary }} 
+                  className="text-center"
+                >
                   Back to Login
                 </Text>
               </TouchableOpacity>

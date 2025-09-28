@@ -4,9 +4,11 @@ import Avatar from "@/components/Avatar";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { AuthContext } from "@/context/authContext";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const EditProfile = () => {
   const { user, setUser } = useContext(AuthContext);
+  const { inlineStyles, theme } = useThemeStyles();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [passwordStrength, setPasswordStrength] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -67,81 +69,99 @@ const EditProfile = () => {
   };
 
   return (
-    <CustomSafeArea>
-      <View>
-        <Avatar
-          size={100}
-          className="self-center"
-          icon={<AntDesign name="edit" size={14} color="white" />}
-          iconBgColour={"bg-blue-500"}
-        />
-      </View>
+    <View style={inlineStyles.background} className="flex-1">
+      <CustomSafeArea>
+        <View>
+          <Avatar
+            size={100}
+            className="self-center"
+            icon={<AntDesign name="edit" size={14} color="white" />}
+            iconBgColour={"bg-blue-500"}
+          />
+        </View>
 
-      {user && (
-        <View className="flex-1 gap-4 p-4">
-          {/* Username */}
-          <View className="gap-2">
-            <Text>Username:</Text>
-            <TextInput
-              value={formData.username}
-              onChangeText={(text) =>
-                setFormData({ ...formData, username: text })
-              }
-              className="border border-gray-400 p-2 rounded-xl"
-              placeholder="Username"
-            />
-          </View>
-
-          {/* Password */}
-          <View className="gap-2">
-            <Text>Password:</Text>
-            <View className="flex-row items-center border border-gray-400 p-2 rounded-xl">
+        {user && (
+          <View className="flex-1 gap-4 p-4">
+            {/* Username */}
+            <View className="gap-2">
+              <Text style={inlineStyles.text}>Username:</Text>
               <TextInput
-                secureTextEntry={!showPassword}
-                value={formData.password}
-                onChangeText={(text) => {
-                  setFormData({ ...formData, password: text });
-                  checkPasswordStrength(text);
+                value={formData.username}
+                onChangeText={(text) =>
+                  setFormData({ ...formData, username: text })
+                }
+                style={{
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
+                  color: theme.text,
                 }}
-                className="flex-1"
-                placeholder="********"
+                className="border p-2 rounded-xl"
+                placeholder="Username"
+                placeholderTextColor={theme.textSecondary}
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <AntDesign
-                  name={showPassword ? "eye" : "eyeo"}
-                  size={20}
-                  color="gray"
-                />
-              </TouchableOpacity>
             </View>
 
-            {passwordStrength ? (
-              <Text
-                className={`text-sm ${
-                  passwordStrength.includes("Strong")
-                    ? "text-green-600"
-                    : passwordStrength.includes("Medium")
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}
+            {/* Password */}
+            <View className="gap-2">
+              <Text style={inlineStyles.text}>Password:</Text>
+              <View 
+                style={{
+                  backgroundColor: theme.surface,
+                  borderColor: theme.border,
+                }}
+                className="flex-row items-center border p-2 rounded-xl"
               >
-                {passwordStrength}
-              </Text>
-            ) : null}
-          </View>
+                <TextInput
+                  secureTextEntry={!showPassword}
+                  value={formData.password}
+                  onChangeText={(text) => {
+                    setFormData({ ...formData, password: text });
+                    checkPasswordStrength(text);
+                  }}
+                  style={{ color: theme.text }}
+                  className="flex-1"
+                  placeholder="********"
+                  placeholderTextColor={theme.textSecondary}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                  <AntDesign
+                    name={showPassword ? "eye" : "eyeo"}
+                    size={20}
+                    color={theme.textSecondary}
+                  />
+                </TouchableOpacity>
+              </View>
 
-          {/* Submit Button */}
-          <TouchableOpacity
-            onPress={submitChanges}
-            className="bg-brand-purple p-4 rounded-xl mt-auto"
-          >
-            <Text className="text-white text-center font-semibold">
-              Submit Changes
-            </Text>
-          </TouchableOpacity>
-        </View>
-      )}
-    </CustomSafeArea>
+              {passwordStrength ? (
+                <Text
+                  style={{
+                    color: passwordStrength.includes("Strong")
+                      ? theme.success
+                      : passwordStrength.includes("Medium")
+                      ? theme.warning
+                      : theme.danger,
+                  }}
+                  className="text-sm"
+                >
+                  {passwordStrength}
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Submit Button */}
+            <TouchableOpacity
+              onPress={submitChanges}
+              style={{ backgroundColor: theme.primary }}
+              className="p-4 rounded-xl mt-auto"
+            >
+              <Text className="text-white text-center font-semibold">
+                Submit Changes
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      </CustomSafeArea>
+    </View>
   );
 };
 

@@ -10,46 +10,51 @@ import { AuthContext } from "@/context/authContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
-const homeTiles = [
-  {
-    title: "Connect",
-    link: "",
-  },
-  {
-    title: "Start workout",
-    link: "",
-    icon: <MaterialCommunityIcons name={"bike"} size={42} color="#EB7363" />,
-  },
-  {
-    title: "Groups",
-    link: "/groups",
-    icon: <MaterialIcons name="groups" size={42} color="#Eb7363" />,
-  },
-  {
-    title: "Schedule",
-    link: "/workoutSchedule",
-    icon: <AntDesign name="calendar" size={42} color="#EB7363" />,
-  },
-
-  {
-    title: "Friends",
-    link: "/friendslist",
-    icon: <MaterialIcons name="group" size={42} color="#EB7363" />,
-  },
-
-  {
-    title: "Current Workout",
-    link: "/currentWorkout",
-    icon: <FontAwesome5 name="running" size={42} color="green" />,
-  },
-];
+// Move homeTiles inside component to access theme
 
 const Home = () => {
   const { user } = useContext(AuthContext);
+  const { inlineStyles, theme } = useThemeStyles();
+  
+  // Theme-aware home tiles with dynamic icon colors
+  const homeTiles = [
+    {
+      title: "Connect",
+      link: "",
+    },
+    {
+      title: "Start workout",
+      link: "",
+      icon: <MaterialCommunityIcons name={"bike"} size={42} color={theme.accent} />,
+    },
+    {
+      title: "Groups",
+      link: "/groups",
+      icon: <MaterialIcons name="groups" size={42} color={theme.accent} />,
+    },
+    {
+      title: "Schedule",
+      link: "/workoutSchedule",
+      icon: <AntDesign name="calendar" size={42} color={theme.accent} />,
+    },
+    {
+      title: "Friends",
+      link: "/friendslist",
+      icon: <MaterialIcons name="group" size={42} color={theme.accent} />,
+    },
+    {
+      title: "Current Workout",
+      link: "/currentWorkout",
+      icon: <FontAwesome5 name="running" size={42} color={theme.success} />,
+    },
+  ];
+  
   return (
-    <CustomSafeArea applyTopInset={false} bgColour="black">
-      <View className="px-4 flex-1">
+    <View style={inlineStyles.background} className="flex-1">
+      <CustomSafeArea applyTopInset={false}>
+        <View className="px-4 flex-1">
         {/* Header */}
         <View className="flex-row justify-between items-center my-4">
           <WelcomeMessage name={user.username ? user.username : "Username"} />
@@ -67,8 +72,9 @@ const Home = () => {
           data={homeTiles}
           renderItem={({ item }) => <HomeScreenTile item={item} />}
         />
-      </View>
-    </CustomSafeArea>
+        </View>
+      </CustomSafeArea>
+    </View>
   );
 };
 

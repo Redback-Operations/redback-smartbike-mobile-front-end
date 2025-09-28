@@ -1,5 +1,6 @@
 import { View, TextInput } from "react-native";
 import React, { useState } from "react";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const TextInputWithLogo = ({
   logo,
@@ -10,11 +11,14 @@ const TextInputWithLogo = ({
   id,
 }) => {
   const [focus, setFocus] = useState(false);
+  const { theme } = useThemeStyles();
   return (
     <View
-      className={`flex flex-row relative items-center transition-all duration-500 border gap-4 px-6 py-4 rounded-full ${
-        focus ? "border-brand-purple" : "border-gray-400"
-      }`}
+      style={{
+        backgroundColor: theme.surface,
+        borderColor: focus ? theme.primary : theme.border,
+      }}
+      className="flex flex-row relative items-center transition-all duration-500 border gap-4 px-6 py-4 rounded-full"
     >
       {logo}
 
@@ -24,6 +28,8 @@ const TextInputWithLogo = ({
         secureTextEntry={secure}
         className="w-full rounded-full"
         placeholder={placeholder}
+        placeholderTextColor={theme.textSecondary}
+        style={{ color: theme.text }}
         onFocus={() => {
           setFocus(true);
         }}

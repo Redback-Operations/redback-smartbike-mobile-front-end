@@ -13,6 +13,7 @@ import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import { router } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 
 const links = [
   {
@@ -42,8 +43,11 @@ const links = [
 ];
 
 const aboutUs = () => {
+  const { inlineStyles, theme } = useThemeStyles();
+  
   return (
-    <CustomSafeArea>
+    <View style={inlineStyles.background} className="flex-1">
+      <CustomSafeArea>
       <FlatList
         ListHeaderComponent={
           <View className="p-4  gap-4">
@@ -56,11 +60,17 @@ const aboutUs = () => {
             <Image />
 
             <View className="my-6 gap-2 ">
-              <Text className="text-center leading-6">
+              <Text 
+                style={{ color: theme.text }} 
+                className="text-center leading-6"
+              >
                 Redback operations aims to turn small steps of virtuality into
                 bigger steps of reality, making you smarter, fitter, and better.
               </Text>
-              <Text className="text-center leading-6">
+              <Text 
+                style={{ color: theme.text }} 
+                className="text-center leading-6"
+              >
                 Bad weather? Traffic? Worry not, our smart bike project
                 transforms your indoor cycling experience but also features an
                 interactive virtual reality game and accessible mobile
@@ -100,8 +110,9 @@ const aboutUs = () => {
             </LinearGradient>
           </TouchableOpacity>
         )}
-      />
-    </CustomSafeArea>
+        />
+      </CustomSafeArea>
+    </View>
   );
 };
 

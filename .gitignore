@@ -34,3 +34,6 @@ yarn-error.*
 
 # typescript
 *.tsbuildinfo
+
+
+DARK_THEME_IMPLEMENTATION_REPORT.md

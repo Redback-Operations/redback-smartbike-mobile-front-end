@@ -16,10 +16,12 @@ import LoginIcon from "@/components/LoginIcon";
 import { Link, router, useNavigation } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "@/context/authContext";
+import { useThemeStyles } from "@/hooks/useThemeStyles";
 import * as ImagePicker from "expo-image-picker"; // ✅ added
 
 const SignUp = () => {
   const { setUser } = useContext(AuthContext);
+  const { inlineStyles, theme } = useThemeStyles();
   const [userData, setUserData] = useState({
     username: "",
     email: "",
@@ -97,16 +99,25 @@ const SignUp = () => {
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
         <StatusBar barStyle={"light-content"} />
         <SafeAreaView>
-          <View className="bg-white max-h-[78%] py-6 m-6 rounded-[48px] flex justify-center px-4">
+          <View 
+            style={[inlineStyles.card, { maxHeight: '78%' }]} 
+            className="py-6 m-6 rounded-[48px] flex justify-center px-4"
+          >
             <Image
               source={require("@assets/redback-logo.png")}
               className="max-w-[130px] max-h-[130px] self-center mb-6"
               resizeMode="contain"
             />
-            <Text className="text-brand-navy text-center text-3xl font-bold">
+            <Text 
+              style={{ color: theme.secondary }} 
+              className="text-center text-3xl font-bold"
+            >
               Tell Us About Yourself
             </Text>
-            <Text className="text-xl font-semibold text-center">
+            <Text 
+              style={inlineStyles.text} 
+              className="text-xl font-semibold text-center"
+            >
               Create an Account
             </Text>
             <View className="gap-4 my-12">
@@ -114,13 +125,13 @@ const SignUp = () => {
                 data={userData}
                 setData={setUserData}
                 placeholder={"Name"}
-                logo={<AntDesign name="user" size={24} color="black" />}
+                logo={<AntDesign name="user" size={24} color={theme.text} />}
                 id="username"
               />
               <TextInputWithLogo
                 data={userData}
                 setData={setUserData}
-                logo={<AntDesign name="mail" size={24} color="black" />}
+                logo={<AntDesign name="mail" size={24} color={theme.text} />}
                 placeholder={"example@gmail.com"}
                 id={"email"}
               />
@@ -128,7 +139,7 @@ const SignUp = () => {
                 data={userData}
                 setData={setUserData}
                 secure
-                logo={<AntDesign name="lock1" size={28} color="black" />}
+                logo={<AntDesign name="lock1" size={28} color={theme.text} />}
                 placeholder={"Enter your password"}
                 id={"password"}
               />
@@ -136,9 +147,13 @@ const SignUp = () => {
               {/* ✅ Photo Upload Button */}
               <TouchableOpacity
                 onPress={pickImage}
-                className="bg-gray-200 w-2/3 self-center rounded-full px-6 py-3 mt-4"
+                style={{ backgroundColor: theme.surface }}
+                className="w-2/3 self-center rounded-full px-6 py-3 mt-4"
               >
-                <Text className="text-center text-brand-navy">
+                <Text 
+                  style={{ color: theme.secondary }} 
+                  className="text-center"
+                >
                   {photo ? "Change Photo" : "Upload Photo (Optional)"}
                 </Text>
               </TouchableOpacity>
@@ -171,7 +186,10 @@ const SignUp = () => {
             <Text className="text-white text-center">
               Already have an account?{" "}
               <Link href={"/"}>
-                <Text className="text-brand-purple font-semibold">
+                <Text 
+                  style={{ color: theme.primary }} 
+                  className="font-semibold"
+                >
                   Sign in here
                 </Text>
               </Link>
