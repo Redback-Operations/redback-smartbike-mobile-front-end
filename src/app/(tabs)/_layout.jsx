@@ -68,7 +68,7 @@ const _layout = () => {
           title: "friends",
           tabBarIcon: ({ focused }) => (
             <FontAwesome5
-              name="users"             
+              name="users"
               size={24}
               color={focused ? "#EB7363" : "gray"}
             />
