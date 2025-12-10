@@ -21,7 +21,6 @@ const quotes = [
 
 const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
-
 const homeTiles = [
   {
     title: "Connect",
@@ -58,14 +57,21 @@ const homeTiles = [
 
 const Home = () => {
   const { user } = useContext(AuthContext);
+
+  // 🔹 Weekly streak mock (can be wired to real data later)
+  const weeklyStreakDays = 5;
+
   return (
     <CustomSafeArea applyTopInset={false} bgColour="black">
       <View className="px-4 flex-1">
         {/* Header */}
         <View className="flex-row justify-between items-center my-4">
-          <WelcomeMessage name={user.username ? user.username : "Welcome Rider"} />
+          <WelcomeMessage
+            name={user.username ? user.username : "Welcome Rider"}
+          />
           <Avatar size={50} />
         </View>
+
         {/* Motivational Quote at Top */}
         <Text
           style={{
@@ -79,6 +85,47 @@ const Home = () => {
           {randomQuote}
         </Text>
 
+        {/* 🔹 Weekly Streak Badge */}
+        <View
+          style={{
+            backgroundColor: "rgba(255,255,255,0.06)",
+            borderRadius: 16,
+            paddingVertical: 10,
+            paddingHorizontal: 14,
+            marginBottom: 16,
+            borderWidth: 1,
+            borderColor: "rgba(235,115,99,0.4)",
+          }}
+        >
+          <Text
+            style={{
+              color: "#e5e7eb",
+              fontSize: 12,
+              fontWeight: "600",
+              marginBottom: 2,
+            }}
+          >
+            Weekly streak
+          </Text>
+          <Text
+            style={{
+              color: "#22c55e",
+              fontSize: 18,
+              fontWeight: "700",
+            }}
+          >
+            🔥 {weeklyStreakDays}-day streak
+          </Text>
+          <Text
+            style={{
+              color: "#9ca3af",
+              fontSize: 11,
+              marginTop: 4,
+            }}
+          >
+            Keep riding to keep your streak alive.
+          </Text>
+        </View>
 
         {/* Last Week Activity */}
         <LastWeekActivity />

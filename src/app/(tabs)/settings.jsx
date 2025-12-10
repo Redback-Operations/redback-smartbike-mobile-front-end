@@ -1,9 +1,11 @@
-import { View, Text, FlatList, Alert } from "react-native";
-import React, { useContext } from "react";
+import { View, Text, FlatList, Pressable } from "react-native";
+import React, { useContext, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import CustomSafeArea from "@/components/CustomSafeArea";
+
 import Setting from "@/components/Setting";
 import { AuthContext } from "@/context/authContext";
 
@@ -13,16 +15,19 @@ const settingsArray = [
     link: "/myProfile",
     icon: <AntDesign name="user" size={18} color="black" />,
   },
+
   {
     title: "Edit Profile",
     link: "/editProfile",
     icon: <AntDesign name="user" size={18} color="black" />,
   },
+
   {
     title: "Contact Us",
     link: "/contact",
     icon: <AntDesign name="mail" size={18} color="black" />,
   },
+
   {
     title: "My Workout History",
     link: "/workoutHistory",
@@ -42,7 +47,6 @@ const settingsArray = [
     title: "Delete Account",
     link: "/deleteAccount",
     icon: <AntDesign name="deleteuser" size={18} color="black" />,
-    isDelete: true,
   },
   {
     title: "Logout",
@@ -55,34 +59,11 @@ const settingsArray = [
 const settings = () => {
   const { user } = useContext(AuthContext);
 
-  // Handle confirmation
-  const handleAction = (item) => {
-    if (item.isLogOut) {
-      Alert.alert(
-        "Confirm Logout",
-        "Are you sure you want to log out?",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Logout", style: "destructive", onPress: () => console.log("Logged out") },
-        ]
-      );
-    } else if (item.isDelete) {
-      Alert.alert(
-        "Confirm Delete",
-        "This action will permanently delete your account. Continue?",
-        [
-          { text: "Cancel", style: "cancel" },
-          { text: "Delete", style: "destructive", onPress: () => console.log("Account deleted") },
-        ]
-      );
-    } else {
-      // Navigate normally
-      console.log(`Navigate to ${item.link}`);
-    }
-  };
+  // 🔹 NEW: distance unit preference state
+  const [distanceUnit, setDistanceUnit] = useState("km");
 
   return (
-    <View className="flex-1">
+    <View className="flex-1 ">
       <LinearGradient colors={["#994D74", "#3A1C72"]}>
         <SafeAreaView className="h-[350px] flex justify-center items-center">
           <Avatar size={100} />
@@ -97,14 +78,60 @@ const settings = () => {
 
         <FlatList
           data={settingsArray}
+          keyExtractor={(item) => item.title}
           showsVerticalScrollIndicator={false}
+          // 🔹 NEW: header component for “Preferences” + units toggle
+          ListHeaderComponent={
+            <View className="mt-6 mb-2">
+              <Text className="text-base font-semibold text-gray-500 mb-2">
+                Preferences
+              </Text>
+
+              <View className="flex-row items-center justify-between py-2">
+                <Text className="text-[15px] text-gray-900">
+                  Distance units
+                </Text>
+
+                <View className="flex-row bg-gray-200 rounded-full p-1">
+                  <Pressable
+                    onPress={() => setDistanceUnit("km")}
+                    className={`px-3 py-1 rounded-full ${distanceUnit === "km" ? "bg-black" : ""
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs ${distanceUnit === "km"
+                          ? "text-white font-semibold"
+                          : "text-gray-600"
+                        }`}
+                    >
+                      km
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setDistanceUnit("mi")}
+                    className={`px-3 py-1 rounded-full ml-1 ${distanceUnit === "mi" ? "bg-black" : ""
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs ${distanceUnit === "mi"
+                          ? "text-white font-semibold"
+                          : "text-gray-600"
+                        }`}
+                    >
+                      mi
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          }
           renderItem={({ item }) => (
             <Setting
               isLogOut={!!item.isLogOut}
               settingTitle={item.title}
               link={item.link}
               icon={item.icon}
-              onPress={() => handleAction(item)} //  Added confirmation
             />
           )}
         />
