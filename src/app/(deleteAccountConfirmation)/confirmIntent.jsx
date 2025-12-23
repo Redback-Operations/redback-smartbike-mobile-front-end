@@ -1,59 +1,50 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useContext } from "react";
-import { AuthContext } from "@/context/authContext";
+import React from "react";
 import { router } from "expo-router";
+import { useAuth } from "@/auth/AuthContext";
 
 const ConfirmDeletionForm = ({ setConfirmDeletion, setDeleteSuccessful }) => {
-  const { user } = useContext(AuthContext);
+  const { isAuthed, signOut } = useAuth();
 
   const handleDeleteUser = async () => {
-    //PRODUCTION CODE
-    // const response = await fetch(
-    //   `http://0.0.0.0:8000/user/delete/${user.id}/`,
-    //   {
-    //     method: "DELETE",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
+    if (!isAuthed) {
+      alert("You must be signed in to delete your account.");
+      return;
+    }
 
-    // switch (response.status) {
-    //   case 404:
-    //     alert("User not found");
-    //     return;
-    //   case 204:
-    //     setDeleteSuccessful(true);
-    //     break;
-    // }
+    // MVP: backend not ready, so simulate deletion flow
+    // Optional: clear auth to mimic account removal session end
+    await signOut();
 
-    //DEV CODE
-    router.push("/confirmAccountDeletion");
+    // If you have a success state in parent, you can set it here
+    if (setDeleteSuccessful) setDeleteSuccessful(true);
+
+    router.push("/");
   };
 
   return (
-    <View className="bg-black/80  flex-1">
+    <View className="bg-black/80 flex-1">
       <View className="gap-4 p-4 h-[250px] bg-white flex-col rounded-xl justify-center absolute bottom-0 left-0 right-0">
         <View className="w-[70px] bg-red-500 self-center rounded-full">
           <Text className="text-white text-center">Warning</Text>
         </View>
+
         <Text className="text-lg font-bold text-center">
           Are you sure you want to delete your account?
         </Text>
+
         <Text className="text-center text-gray-600">
           By deleting your account you will lose your data.
         </Text>
-        {/* Buttons */}
+
         <View className="flex-row gap-4">
-          {/* BACK BUTTON */}
           <TouchableOpacity
             onPress={() => router.back()}
             className="flex-1 rounded-full border border-gray-200 p-4"
           >
             <Text className="text-center font-semibold">Back</Text>
           </TouchableOpacity>
-          {/* CONFIRM BUTTON */}
+
           <TouchableOpacity
             onPress={handleDeleteUser}
             className="flex-1 rounded-full bg-brand-purple p-4"

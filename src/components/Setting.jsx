@@ -1,25 +1,30 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useContext } from "react";
+import React from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { router } from "expo-router";
-import { AuthContext } from "@/context/authContext";
+import { useAuth } from "@/auth/AuthContext";
 
 const Setting = ({ settingTitle, icon, link, isLogOut }) => {
-  const { setUser, user } = useContext(AuthContext);
+  const { signOut } = useAuth();
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (isLogOut) {
-      console.log("logged out");
-      if (user) {
-        setUser({});
+      try {
+        await signOut();          // clears stored tokens + sets isAuthed false
+        router.replace("/"); // send user back to login
+        return;
+      } catch (e) {
+        console.log("Logout error:", e);
       }
     }
+
     router.push(link);
   };
+
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="flex-row gap-4 items-baseline  my-2"
+      className="flex-row gap-4 items-baseline my-2"
     >
       <View>{icon}</View>
       <Text className="font-semibold">{settingTitle}</Text>

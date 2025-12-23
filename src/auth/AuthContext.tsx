@@ -30,9 +30,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsAuthed(true);
   }
 
-  async function signOut() {
-    await clearTokens();
-    setIsAuthed(false);
+async function signOut() {
+  console.log("[signOut] start");
+
+  // flip state immediately
+  setIsAuthed(false);
+
+  // clear storage
+  await clearTokens();
+
+  // confirm storage is actually cleared
+  const tokenAfter = await getAccessToken();
+  console.log("[signOut] token after clear =", tokenAfter);
+
+  console.log("[signOut] done");
   }
 
   const value = useMemo(() => ({ isBooting, isAuthed, signIn, signOut }), [isBooting, isAuthed]);

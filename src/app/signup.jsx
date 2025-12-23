@@ -8,27 +8,28 @@ import {
   Keyboard,
   TouchableOpacity,
 } from "react-native";
-import React, { useContext, useState } from "react";
+import React, { useState } from "react";
 import "../../global.css";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TextInputWithLogo from "@/components/TextInputWithLogo";
 import LoginIcon from "@/components/LoginIcon";
-import { Link, router, useNavigation } from "expo-router";
+import { Link, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
-import { AuthContext } from "@/context/authContext";
-import * as ImagePicker from "expo-image-picker"; // ✅ added
+import * as ImagePicker from "expo-image-picker";
+
+import { useAuth } from "@/auth/AuthContext";
 
 const SignUp = () => {
-  const { setUser } = useContext(AuthContext);
+  const { signIn } = useAuth();
+
   const [userData, setUserData] = useState({
     username: "",
     email: "",
     password: "",
   });
 
-  const [photo, setPhoto] = useState(null); // ✅ local photo state
+  const [photo, setPhoto] = useState(null);
 
-  // ✅ Image Picker
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -36,104 +37,75 @@ const SignUp = () => {
       aspect: [1, 1],
       quality: 0.7,
     });
+
     if (!result.canceled) {
       setPhoto(result.assets[0].uri);
     }
   };
 
   const handleSignup = async () => {
-    //PRODUCTION CODE
-    // if (!userData.username || !userData.email || !userData.password) {
-    //   alert("Please complete all fields");
-    //   return;
-    // }
+    // MVP: backend not ready.
+    // For testing, treat "signup" as creating an account and immediately signing in.
 
-    // const formData = new FormData();
-    // formData.append("username", userData.username);
-    // formData.append("email", userData.email);
-    // formData.append("password", userData.password);
+    if (!userData.email || !userData.password) {
+      alert("Please enter email and password");
+      return;
+    }
 
-    // if (photo) {
-    //   const filename = photo.split("/").pop();
-    //   const match = /\.(\w+)$/.exec(filename ?? "");
-    //   const type = match ? `image/${match[1]}` : `image`;
-    //   formData.append("photo", { uri: photo, name: filename, type });
-    // }
-
-    // const response = await fetch(`http://0.0.0.0:8000/signup/`, {
-    //   method: "POST",
-    //   headers: {
-    //     Accept: "application/json",
-    //     "Content-Type": "multipart/form-data",
-    //   },
-    //   body: formData,
-    // });
-
-    // switch (response.status) {
-    //   case 409:
-    //     alert("This email or username already exists");
-    //     break;
-    //   case 400:
-    //     alert("An error occured");
-    //     break;
-    //   case 201:
-    //     const data = await response.json();
-    //     setUser({
-    //       id: data.id,
-    //       username: data.username,
-    //       email: data.email,
-    //       photo: data.photo ?? null, // ✅ store server photo url
-    //     });
-    //     router.replace("/home");
-    //     break;
-    // }
-
-    //DEV CODE
-    router.replace("/home");
+    try {
+      await signIn(userData.email, userData.password);
+      router.replace("/home");
+    } catch (e) {
+      console.log("Signup/signin error:", e);
+      alert("Sign up failed");
+    }
   };
 
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
         <StatusBar barStyle={"light-content"} />
-        <SafeAreaView>
+        <SafeAreaView style={{ flex: 1 }}>
           <View className="bg-white max-h-[78%] py-6 m-6 rounded-[48px] flex justify-center px-4">
             <Image
               source={require("@assets/redback-logo.png")}
               className="max-w-[130px] max-h-[130px] self-center mb-6"
               resizeMode="contain"
             />
+
             <Text className="text-brand-navy text-center text-3xl font-bold">
               Tell Us About Yourself
             </Text>
             <Text className="text-xl font-semibold text-center">
               Create an Account
             </Text>
+
             <View className="gap-4 my-12">
               <TextInputWithLogo
                 data={userData}
                 setData={setUserData}
-                placeholder={"Name"}
+                placeholder="Name"
                 logo={<AntDesign name="user" size={24} color="black" />}
                 id="username"
               />
+
               <TextInputWithLogo
                 data={userData}
                 setData={setUserData}
                 logo={<AntDesign name="mail" size={24} color="black" />}
-                placeholder={"example@gmail.com"}
-                id={"email"}
+                placeholder="example@gmail.com"
+                id="email"
               />
+
               <TextInputWithLogo
                 data={userData}
                 setData={setUserData}
                 secure
                 logo={<AntDesign name="lock1" size={28} color="black" />}
-                placeholder={"Enter your password"}
-                id={"password"}
+                placeholder="Enter your password"
+                id="password"
               />
 
-              {/* ✅ Photo Upload Button */}
               <TouchableOpacity
                 onPress={pickImage}
                 className="bg-gray-200 w-2/3 self-center rounded-full px-6 py-3 mt-4"
@@ -143,7 +115,6 @@ const SignUp = () => {
                 </Text>
               </TouchableOpacity>
 
-              {/* ✅ Show selected photo preview */}
               {photo && (
                 <Image
                   source={{ uri: photo }}
@@ -168,9 +139,10 @@ const SignUp = () => {
               <LoginIcon image={require("@assets/facebook.png")} />
               <LoginIcon image={require("@assets/google.png")} />
             </View>
+
             <Text className="text-white text-center">
               Already have an account?{" "}
-              <Link href={"/"}>
+              <Link href="/">
                 <Text className="text-brand-purple font-semibold">
                   Sign in here
                 </Text>

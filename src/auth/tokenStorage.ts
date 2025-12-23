@@ -43,4 +43,8 @@ export async function getRefreshToken() {
 export async function clearTokens() {
   await deleteItem(ACCESS_TOKEN_KEY);
   await deleteItem(REFRESH_TOKEN_KEY);
+
+  // DEBUG: confirm deletion
+  const t = await getItem(ACCESS_TOKEN_KEY);
+  console.log("After clearTokens, access_token =", t);
 }

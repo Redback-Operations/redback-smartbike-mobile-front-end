@@ -2,8 +2,7 @@ import { useEffect } from "react";
 import { usePathname, useRouter } from "expo-router";
 import { useAuth } from "./AuthContext";
 
-// Public screens in your stack
-const PUBLIC_ROUTES = ["/", "/index", "/signup", "/forgot-password"];
+const PUBLIC_ROUTES = ["/", "/signup", "/forgot-password"];
 
 function isPublic(pathname: string) {
   return PUBLIC_ROUTES.includes(pathname);
@@ -17,19 +16,18 @@ export default function AuthGate() {
   useEffect(() => {
     if (isBooting) return;
 
-    // If not authed, block access to everything except public pages
+    // Not authed: block everything except public routes
     if (!isAuthed && !isPublic(pathname)) {
-      router.replace("/index");
+      router.replace("/");
       return;
     }
 
-    // If authed, keep them out of login/signup
-    if (isAuthed && (pathname === "/index" || pathname === "/signup" || pathname === "/")) {
-      // IMPORTANT: this must match your actual “main app” route
-      // If your main screen is /home, use "/home"
+    // Authed: keep out of auth screens
+    if (isAuthed && isPublic(pathname)) {
       router.replace("/home");
+      return;
     }
-  }, [isBooting, isAuthed, pathname, router]);
+  }, [isBooting, isAuthed, pathname]);
 
   return null;
 }
