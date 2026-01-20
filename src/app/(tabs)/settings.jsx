@@ -1,5 +1,5 @@
-import { View, Text, FlatList } from "react-native";
-import React, { useContext } from "react";
+import { View, Text, FlatList, Pressable } from "react-native";
+import React, { useContext, useState } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -58,6 +58,10 @@ const settingsArray = [
 
 const settings = () => {
   const { user } = useContext(AuthContext);
+
+  // 🔹 NEW: distance unit preference state
+  const [distanceUnit, setDistanceUnit] = useState("km");
+
   return (
     <View className="flex-1 ">
       <LinearGradient colors={["#994D74", "#3A1C72"]}>
@@ -68,12 +72,60 @@ const settings = () => {
           </Text>
         </SafeAreaView>
       </LinearGradient>
+
       <View className="h-full relative -top-14 rounded-[48px] bg-white py-8 px-6">
         <Text className="text-3xl font-bold text-center">Settings</Text>
 
         <FlatList
           data={settingsArray}
+          keyExtractor={(item) => item.title}
           showsVerticalScrollIndicator={false}
+          // 🔹 NEW: header component for “Preferences” + units toggle
+          ListHeaderComponent={
+            <View className="mt-6 mb-2">
+              <Text className="text-base font-semibold text-gray-500 mb-2">
+                Preferences
+              </Text>
+
+              <View className="flex-row items-center justify-between py-2">
+                <Text className="text-[15px] text-gray-900">
+                  Distance units
+                </Text>
+
+                <View className="flex-row bg-gray-200 rounded-full p-1">
+                  <Pressable
+                    onPress={() => setDistanceUnit("km")}
+                    className={`px-3 py-1 rounded-full ${distanceUnit === "km" ? "bg-black" : ""
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs ${distanceUnit === "km"
+                          ? "text-white font-semibold"
+                          : "text-gray-600"
+                        }`}
+                    >
+                      km
+                    </Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={() => setDistanceUnit("mi")}
+                    className={`px-3 py-1 rounded-full ml-1 ${distanceUnit === "mi" ? "bg-black" : ""
+                      }`}
+                  >
+                    <Text
+                      className={`text-xs ${distanceUnit === "mi"
+                          ? "text-white font-semibold"
+                          : "text-gray-600"
+                        }`}
+                    >
+                      mi
+                    </Text>
+                  </Pressable>
+                </View>
+              </View>
+            </View>
+          }
           renderItem={({ item }) => (
             <Setting
               isLogOut={!!item.isLogOut}
