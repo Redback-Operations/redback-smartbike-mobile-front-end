@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -49,16 +49,25 @@ const workoutSummary = {
 export default function RedbackWeeklySummary() {
   const [loading, setLoading] = useState(true);
   const [rideData, setRideData] = useState([]);
+  const [lastUpdated, setLastUpdated] = useState("");
 
   useEffect(() => {
     setTimeout(() => {
       setRideData(mockData);
+      setLastUpdated(new Date().toLocaleString());
       setLoading(false);
     }, 1000);
   }, []);
 
   const totalMinutes = rideData.reduce((sum, d) => sum + d.minutes, 0);
   const activeDays = rideData.filter((d) => d.minutes > 0).length;
+
+  // Total sessions = days with minutes > 0 (same as activeDays)
+  const totalSessions = activeDays;
+
+  // Average session length
+  const avgSessionMin =
+    totalSessions > 0 ? Math.round(totalMinutes / totalSessions) : 0;
 
   // Convert minutes → hours + minutes
   const hours = Math.floor(totalMinutes / 60);
@@ -69,22 +78,36 @@ export default function RedbackWeeklySummary() {
   const bestDay =
     rideData.length > 0
       ? rideData.reduce((prev, current) =>
-        current.minutes > prev.minutes ? current : prev
-      )
+          current.minutes > prev.minutes ? current : prev
+        )
       : { day: "-", minutes: 0 };
 
-  // Weekly trend mock
+  // Weekly comparison (mock baseline)
   const lastWeekMinutes = 250; // mock value
-  const trend = totalMinutes > lastWeekMinutes ? "⬆️ Up" : "⬇️ Down";
+  const diffMinutes = totalMinutes - lastWeekMinutes;
+  const diffPercent =
+    lastWeekMinutes > 0
+      ? Math.round((Math.abs(diffMinutes) / lastWeekMinutes) * 100)
+      : 0;
 
-  const chartData = {
-    labels: rideData.map((d) => d.day),
-    datasets: [
-      {
-        data: rideData.map((d) => d.minutes),
-      },
-    ],
-  };
+  const comparisonLabel =
+    diffMinutes === 0
+      ? "No change vs last week"
+      : diffMinutes > 0
+      ? `⬆️ +${diffMinutes} min (${diffPercent}%) vs last week`
+      : `⬇️ ${diffMinutes} min (${diffPercent}%) vs last week`;
+
+  const chartData = useMemo(
+    () => ({
+      labels: rideData.map((d) => d.day),
+      datasets: [
+        {
+          data: rideData.map((d) => d.minutes),
+        },
+      ],
+    }),
+    [rideData]
+  );
 
   const customYLabels = ["0.00", "24.75", "49.50", "74.25", "99.00"];
 
@@ -122,7 +145,7 @@ export default function RedbackWeeklySummary() {
               }}
             />
 
-            {/* Total Minutes + Active Days */}
+            {/* Core stats */}
             <View style={styles.stats}>
               <Text style={styles.statText}>
                 🕒 Total Time:{" "}
@@ -130,10 +153,23 @@ export default function RedbackWeeklySummary() {
                   {formattedTotalTime} ({totalMinutes} min)
                 </Text>
               </Text>
+
+              <Text style={styles.statText}>
+                ✅ Total Sessions:{" "}
+                <Text style={styles.statHighlight}>{totalSessions}</Text>
+              </Text>
+
+              <Text style={styles.statText}>
+                ⏱ Avg Session:{" "}
+                <Text style={styles.statHighlight}>{avgSessionMin} min</Text>
+              </Text>
+
               <Text style={styles.statText}>
                 📅 Active Days:{" "}
                 <Text style={styles.statHighlight}>{activeDays} days</Text>
               </Text>
+
+              <Text style={styles.lastUpdated}>Last updated: {lastUpdated}</Text>
             </View>
 
             {/* Workout Summary */}
@@ -165,8 +201,8 @@ export default function RedbackWeeklySummary() {
               </Text>
             </View>
 
-            {/* Weekly Trend */}
-            <Text style={styles.trendText}>Weekly Trend: {trend}</Text>
+            {/* Weekly Comparison */}
+            <Text style={styles.trendText}>{comparisonLabel}</Text>
 
             {/* Motivation */}
             <View style={styles.motivationBox}>
@@ -232,6 +268,11 @@ const styles = StyleSheet.create({
   statHighlight: {
     color: "#ff7f50",
     fontWeight: "700",
+  },
+  lastUpdated: {
+    marginTop: 6,
+    fontSize: 12,
+    color: "#999",
   },
   summaryBox: {
     marginTop: 20,
