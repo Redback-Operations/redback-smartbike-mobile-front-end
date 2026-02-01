@@ -1,11 +1,16 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigation } from "expo-router";
+import { AuthContext } from "@/context/authContext";
 
 const confirmAccountDeletion = ({ open, setConfirmDeletion }) => {
   const [deleteSuccessful, setDeleteSuccessful] = useState(false);
 
   const navigation = useNavigation();
+  const { setUser, user } = useContext(AuthContext);
+
+  //log out active user
+    console.log("logged out");
 
   return (
     <View className="bg-black/80  flex-1">
@@ -23,6 +28,9 @@ const confirmAccountDeletion = ({ open, setConfirmDeletion }) => {
               index: 0,
               routes: [{ name: "index" }],
             });
+              if (user) {
+                setUser({});
+              }
           }}
           className="bg-brand-purple p-4 rounded-full "
         >

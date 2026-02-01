@@ -3,33 +3,39 @@ import React, { useContext } from "react";
 import { AuthContext } from "@/context/authContext";
 import { router } from "expo-router";
 
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const DELETE_URL = `${API_BASE_URL}/user/delete/`;
+
 const ConfirmDeletionForm = ({ setConfirmDeletion, setDeleteSuccessful }) => {
   const { user } = useContext(AuthContext);
-
   const handleDeleteUser = async () => {
     //PRODUCTION CODE
-    // const response = await fetch(
-    //   `http://0.0.0.0:8000/user/delete/${user.id}/`,
-    //   {
-    //     method: "DELETE",
-    //     headers: {
-    //       Accept: "application/json",
-    //       "Content-Type": "application/json",
-    //     },
-    //   }
-    // );
 
-    // switch (response.status) {
-    //   case 404:
-    //     alert("User not found");
-    //     return;
-    //   case 204:
-    //     setDeleteSuccessful(true);
-    //     break;
-    // }
+    const response = await fetch(`${DELETE_URL}${user.id}/`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+        },
+    });
+
+    switch (response.status) {
+      case 404:
+        alert("User not found");
+        return;
+
+      //204 will freeze up on Android because the backend passes a 204 with a body
+      //Android doesn't like 204+body. Either remove body or send 200_OK instead.
+      case 204:
+        //setDeleteSuccessful(true); //function doesn't exist - someone fix this
+        router.push("/confirmAccountDeletion");
+        break;
+      default:
+        alert("Unknown Error!");
+        return;
+    }
 
     //DEV CODE
-    router.push("/confirmAccountDeletion");
+    //router.push("/confirmAccountDeletion");
   };
 
   return (

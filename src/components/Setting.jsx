@@ -1,11 +1,12 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { router } from "expo-router";
+import { useNavigation, router } from "expo-router";
 import { AuthContext } from "@/context/authContext";
 
 const Setting = ({ settingTitle, icon, link, isLogOut }) => {
   const { setUser, user } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const handlePress = () => {
     if (isLogOut) {
@@ -13,8 +14,13 @@ const Setting = ({ settingTitle, icon, link, isLogOut }) => {
       if (user) {
         setUser({});
       }
+      //logging out so reset navigation
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "index" }],
+      });
     }
-    router.push(link);
+    else router.push(link);
   };
   return (
     <TouchableOpacity
