@@ -13,7 +13,6 @@ npm cache clean --force
 npm install --legacy-peer-deps
 npx expo start -c
 ```
-
 5. **Run the app**
 
 Press **w** → browser
