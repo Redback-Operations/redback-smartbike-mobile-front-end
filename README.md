@@ -1,23 +1,27 @@
 # How to run the project
 
 
-1. clone repo
+1. **Clone repo → Go to GitHub → Click Code → Copy HTTPS link → Place in code editor**
 
-2. Install Node if not already installed and update to latest version
-
-3. install dependencies by running
-   
-```bash
-npm install
-```
-
-4. Run the devlopment environment
+2. **Run the project (clean install + start Expo) run this command in termianl.**
 
 ```bash
-npx expo start
+nvm use 20
+rm -rf node_modules
+rm package-lock.json
+npm cache clean --force
+npm install --legacy-peer-deps
+npx expo start -c
 ```
+5. **Run the app**
 
-5. scan QR code and download Expo App to run on physical device **OR** key 'i' for ios simulator or 'a' for android simulator (open simulator first)
+Press **w** → browser
+
+Press **i** → iOS simulator
+
+Press **a** → Android
+
+OR scan QR code using **Expo Go**
 
 **No device?** 
 key 'w' to run in the browser
