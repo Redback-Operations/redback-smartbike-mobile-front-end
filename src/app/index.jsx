@@ -8,60 +8,41 @@ import {
   Keyboard,
   TouchableOpacity,
 } from "react-native";
-import React, { useState, useContext } from "react";
+import React, { useState } from "react";
 import "../../global.css";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TextInputWithLogo from "@/components/TextInputWithLogo";
 import LoginIcon from "@/components/LoginIcon";
-import { Link, router, useNavigation } from "expo-router";
+import { Link, router } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
-import { AuthContext } from "@/context/authContext";
-
-const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-const LOGIN_URL = `${API_BASE_URL}/login/`;
+import { useAuth } from "@/context/authContext";
 
 const index = () => {
-  const { setUser } = useContext(AuthContext);
+  const { signIn } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
 
   const handleLogin = async () => {
-    // production code
-
-    const formData = new FormData();
-    formData.append("email", loginData.email);
-    formData.append("password", loginData.password);
-
-    const response = await fetch(`${LOGIN_URL}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json"
-      },
-      body: formData,
-    });
-
-    switch (response.status) {
-      case 404:
-        alert("Invalid credentials: email doesn't exist");
-        break;
-      case 401:
-        alert("Invalid credentials: incorrect password");
-        break;
-      case 200:
-        const data = await response.json();
-        setUser({
-          id: data.id,
-          username: data.account_details[0].username,
-          email: data.account_details[0].email,
-        });
-        router.replace("/home");
-        break;
+    if (!loginData.email || !loginData.password) {
+      alert("Please enter both email and password");
+      return;
     }
-    // dev code
-    //router.replace("/home");
+
+    try {
+      const { error } = await signIn(loginData.email, loginData.password);
+
+      if (error) {
+        alert(error.message);
+        return;
+      }
+
+      router.replace("/(tabs)");
+    } catch (err) {
+      alert("Something went wrong while signing in");
+      console.log(err);
+    }
   };
 
-  //const navigation = useNavigation();
   return (
     <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
       <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
