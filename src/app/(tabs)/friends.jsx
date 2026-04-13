@@ -1,105 +1,241 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import { LinearGradient } from "expo-linear-gradient";
+import React from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { router, Stack } from "expo-router";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import CustomSafeArea from "@/components/CustomSafeArea";
 
-// Mock friend activity data with gradient colors
-const initialData = [
+const friendsActivity = [
   {
     id: "1",
     name: "Mila",
-    type: "ride",
-    km: 12.4,
-    min: 32,
-    kcal: 245,
+    activity: "Rode 12.4 km",
+    time: "32 min",
+    calories: "245 kcal",
     likes: 3,
     comments: 1,
-    colors: ["#ff3b30", "#ff7e67"], // Red to coral
+    accent: "#fb7185",
   },
   {
     id: "2",
     name: "Jay",
-    type: "goal",
+    activity: "Hit a weekly goal 🎯",
+    time: "",
+    calories: "",
     likes: 6,
     comments: 2,
-    colors: ["#4cd964", "#8de37f"], // Green gradient
+    accent: "#4ade80",
   },
   {
     id: "3",
     name: "Noah",
-    type: "ride",
-    km: 5.8,
-    min: 14,
-    kcal: 114,
+    activity: "Rode 5.8 km",
+    time: "14 min",
+    calories: "114 kcal",
     likes: 1,
     comments: 0,
-    colors: ["#007aff", "#4f8df7"], // Blue gradient
+    accent: "#60a5fa",
   },
 ];
 
-// Returns descriptive text for each activity
-const subtitle = (a) =>
-  a.type === "ride"
-    ? `Rode ${a.km?.toFixed(1)} km • ${a.min} min • ${a.kcal} kcal`
-    : "Hit a weekly goal 🎯";
+const Friends = () => {
+  const renderItem = ({ item }) => {
+    const meta =
+      item.time || item.calories
+        ? `${item.activity} • ${item.time} • ${item.calories}`
+        : item.activity;
 
-// Single friend activity card with gradient background
-function ActivityCard({ a }) {
+    return (
+      <TouchableOpacity
+        activeOpacity={0.88}
+        style={styles.card}
+        onPress={() =>
+          router.push({
+            pathname: "/friendsdetails",
+            params: { name: item.name },
+          })
+        }
+      >
+        <View style={styles.cardTop}>
+          <View
+            style={[
+              styles.avatarCircle,
+              { backgroundColor: `${item.accent}15` },
+            ]}
+          >
+            <Text style={[styles.avatarText, { color: item.accent }]}>
+              {item.name.charAt(0)}
+            </Text>
+          </View>
+
+          <View style={styles.cardTextWrap}>
+            <Text style={styles.name}>{item.name}</Text>
+            <Text style={styles.meta}>{meta}</Text>
+          </View>
+
+          <AntDesign name="right" size={16} color="#9ca3af" />
+        </View>
+
+        <View style={styles.statsRow}>
+          <View style={styles.statPill}>
+            <Text style={[styles.statNumber, { color: item.accent }]}>
+              {item.likes}
+            </Text>
+            <Text style={styles.statLabel}>likes</Text>
+          </View>
+
+          <View style={styles.statPill}>
+            <Text style={[styles.statNumber, { color: item.accent }]}>
+              {item.comments}
+            </Text>
+            <Text style={styles.statLabel}>comments</Text>
+          </View>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   return (
-    <LinearGradient
-      colors={a.colors}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{
-        borderRadius: 16,
-        padding: 16,
-        marginBottom: 12,
-        shadowColor: "#000",
-        shadowOpacity: 0.12,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 4 },
-        elevation: 3,
-      }}
-    >
-      <Text style={{ color: "white", fontSize: 20, fontWeight: "bold", marginBottom: 4 }}>
-        {a.name}
-      </Text>
+    <>
+      <Stack.Screen options={{ headerShown: false }} />
 
-      <Text style={{ color: "white", opacity: 0.9, fontSize: 14, marginTop: 2 }}>
-        {subtitle(a)}
-      </Text>
+      <CustomSafeArea>
+        <View style={styles.container}>
+          <View style={styles.header}>
+            <View>
+              <Text style={styles.heading}>Friends Activity</Text>
+              <Text style={styles.subheading}>
+                See what your friends have been up to
+              </Text>
+            </View>
 
-      <Text style={{ color: "white", opacity: 0.85, fontSize: 12, marginTop: 12 }}>
-        {a.likes} likes • {a.comments} comments
-      </Text>
-    </LinearGradient>
+            <TouchableOpacity
+              style={styles.headerButton}
+              onPress={() => router.push("/friendslist")}
+            >
+              <AntDesign name="team" size={20} color="white" />
+            </TouchableOpacity>
+          </View>
+
+          <FlatList
+            data={friendsActivity}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={styles.listContent}
+            ListFooterComponent={<View style={{ height: 24 }} />}
+          />
+        </View>
+      </CustomSafeArea>
+    </>
   );
-}
+};
 
-export default function Friends() {
-  const [data] = useState(initialData);
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#050505",
+    paddingHorizontal: 20,
+    paddingTop: 14,
+  },
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 22,
+  },
+  heading: {
+    color: "white",
+    fontSize: 30,
+    fontWeight: "700",
+  },
+  subheading: {
+    color: "#9ca3af",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  headerButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#111111",
+    borderWidth: 1,
+    borderColor: "#1f1f1f",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  listContent: {
+    paddingBottom: 10,
+  },
+  card: {
+    backgroundColor: "#0b0b0b",
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: "#1a1a1a",
+    shadowColor: "#000",
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  cardTop: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  avatarCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
+  },
+  avatarText: {
+    fontSize: 20,
+    fontWeight: "700",
+  },
+  cardTextWrap: {
+    flex: 1,
+  },
+  name: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  meta: {
+    color: "#9ca3af",
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  statsRow: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 16,
+  },
+  statPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#181818",
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  statNumber: {
+    fontSize: 13,
+    fontWeight: "700",
+    marginRight: 4,
+  },
+  statLabel: {
+    color: "#9ca3af",
+    fontSize: 13,
+  },
+});
 
-  return (
-    <CustomSafeArea applyTopInset={false} className="flex-1 bg-white">
-      {/* Page header */}
-      <View className="flex-row justify-between items-center m-2 mt-8">
-        <Text className="text-brand-purple my-6 font-bold text-4xl">
-          Friends Activity
-        </Text>
-        <TouchableOpacity onPress={() => {}}>
-          <FontAwesome6 name="user-plus" size={24} color="black" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Gradient friend activity list */}
-      <FlatList
-        data={data}
-        keyExtractor={(x) => x.id}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingHorizontal: 10, paddingBottom: 24 }}
-        renderItem={({ item }) => <ActivityCard a={item} />}
-      />
-    </CustomSafeArea>
-  );
-}
+export default Friends;
