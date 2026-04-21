@@ -1,91 +1,106 @@
-import { View, Text, FlatList } from "react-native";
+import { View, Text, Image } from "react-native";
 import React, { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
-import Avatar from "@/components/Avatar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
-import CustomSafeArea from "@/components/CustomSafeArea";
-
 import Setting from "@/components/Setting";
 import { AuthContext } from "@/context/authContext";
 
-const settingsArray = [
+const settingsItems = [
   {
     title: "My Profile",
     link: "/myProfile",
-    icon: <AntDesign name="user" size={18} color="black" />,
+    icon: <AntDesign name="user" size={18} color="#ff7a6b" />,
   },
-
-  {
-    title: "Edit Profile",
-    link: "/editProfile",
-    icon: <AntDesign name="user" size={18} color="black" />,
-  },
-
   {
     title: "Contact Us",
     link: "/contact",
-    icon: <AntDesign name="mail" size={18} color="black" />,
-  },
-
-  {
-    title: "My Workout History",
-    link: "/workoutHistory",
-    icon: <AntDesign name="barchart" size={18} color="black" />,
-  },
-  {
-    title: "Privacy Settings",
-    link: "/privacySettings",
-    icon: <AntDesign name="lock1" size={20} color="black" />,
+    icon: <AntDesign name="mail" size={18} color="#ff7a6b" />,
   },
   {
     title: "About Us",
     link: "/aboutUs",
-    icon: <AntDesign name="infocirlceo" size={18} color="black" />,
+    icon: <AntDesign name="infocirlceo" size={18} color="#ff7a6b" />,
+  },
+  {
+    title: "Privacy Settings",
+    link: "/privacySettings",
+    icon: <AntDesign name="lock" size={18} color="#ff7a6b" />,
   },
   {
     title: "Delete Account",
     link: "/deleteAccount",
-    icon: <AntDesign name="deleteuser" size={18} color="black" />,
+    icon: <AntDesign name="deleteuser" size={18} color="#ff7a6b" />,
   },
   {
     title: "Logout",
     link: "/",
-    icon: <AntDesign name="logout" size={18} color="black" />,
+    icon: <AntDesign name="logout" size={18} color="#ff7a6b" />,
     isLogOut: true,
   },
 ];
 
-const settings = () => {
+const Settings = () => {
   const { user } = useContext(AuthContext);
+
   return (
-    <View className="flex-1 ">
-      <LinearGradient colors={["#994D74", "#3A1C72"]}>
-        <SafeAreaView className="h-[350px] flex justify-center items-center">
-          <Avatar size={100} />
-          <Text className="font-bold text-lg text-white">
-            {user.username ? user.username : "Username"}
-          </Text>
+    <View className="flex-1 bg-black">
+      <LinearGradient colors={["#8e4b74", "#4a2673", "#111111"]}>
+        <SafeAreaView className="h-[240px] justify-center items-center px-6">
+          <Image
+            source={{
+              uri: user?.photo || "https://i.pravatar.cc/150?img=5",
+            }}
+            style={{
+              width: 88,
+              height: 88,
+              borderRadius: 44,
+            }}
+          />
+
+          <View className="items-center mt-4">
+            <Text className="font-bold text-2xl text-white">
+              {user?.username || "Username"}
+            </Text>
+
+            <Text className="text-gray-400 text-xs mt-1">
+              Account Settings
+            </Text>
+          </View>
         </SafeAreaView>
       </LinearGradient>
-      <View className="h-full relative -top-14 rounded-[48px] bg-white py-8 px-6">
-        <Text className="text-3xl font-bold text-center">Settings</Text>
 
-        <FlatList
-          data={settingsArray}
-          showsVerticalScrollIndicator={false}
-          renderItem={({ item }) => (
-            <Setting
-              isLogOut={!!item.isLogOut}
-              settingTitle={item.title}
-              link={item.link}
-              icon={item.icon}
-            />
-          )}
-        />
+      <View className="flex-1 -mt-6 rounded-t-[32px] bg-[#050505] px-4 pt-8">
+        <View className="w-full max-w-[640px] self-center">
+          <Text className="text-3xl font-bold text-center text-white mb-6">
+            Settings
+          </Text>
+
+          <View className="bg-[#101010] rounded-2xl px-5 py-3 border border-[#1f1f1f]">
+            {settingsItems.map((item, index) => (
+              <View
+                key={item.title}
+                className={
+                  index !== settingsItems.length - 1
+                    ? "border-b border-[#222222]"
+                    : ""
+                }
+              >
+                <Setting
+                  isLogOut={!!item.isLogOut}
+                  settingTitle={item.title}
+                  link={item.link}
+                  icon={item.icon}
+                />
+              </View>
+            ))}
+          </View>
+
+          <View className="h-12" />
+        </View>
       </View>
     </View>
   );
 };
 
-export default settings;
+export default Settings;

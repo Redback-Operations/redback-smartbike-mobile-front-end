@@ -10,31 +10,35 @@ const Setting = ({ settingTitle, icon, link, isLogOut }) => {
 
   const handlePress = () => {
     if (isLogOut) {
-      console.log("logged out");
       if (user) {
         setUser({});
       }
-      //logging out so reset navigation
+
       navigation.reset({
         index: 0,
         routes: [{ name: "index" }],
       });
+    } else {
+      router.push(link);
     }
-    else router.push(link);
   };
+
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="flex-row gap-4 items-baseline  my-2"
+      className="flex-row items-center py-4 px-1"
     >
-      <View>{icon}</View>
-      <Text className="font-semibold">{settingTitle}</Text>
+      <View className="w-8 items-center">{icon}</View>
+
+      <Text className="ml-2 text-base font-medium text-white">
+        {settingTitle}
+      </Text>
 
       <MaterialIcons
         className="ml-auto"
         name="navigate-next"
-        size={24}
-        color="black"
+        size={22}
+        color="#9ca3af"
       />
     </TouchableOpacity>
   );
