@@ -1,116 +1,32 @@
 import React from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-} from "react-native";
+import { View, Text, FlatList, TouchableOpacity, StyleSheet } from "react-native";
 import { router, Stack } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import CustomSafeArea from "@/components/CustomSafeArea";
-
-const friendsActivity = [
-  {
-    id: "1",
-    name: "Mila",
-    activity: "Rode 12.4 km",
-    time: "32 min",
-    calories: "245 kcal",
-    likes: 3,
-    comments: 1,
-    accent: "#fb7185",
-  },
-  {
-    id: "2",
-    name: "Jay",
-    activity: "Hit a weekly goal 🎯",
-    time: "",
-    calories: "",
-    likes: 6,
-    comments: 2,
-    accent: "#4ade80",
-  },
-  {
-    id: "3",
-    name: "Noah",
-    activity: "Rode 5.8 km",
-    time: "14 min",
-    calories: "114 kcal",
-    likes: 1,
-    comments: 0,
-    accent: "#60a5fa",
-  },
-];
+import FriendActivityCard from "@/features/friends/components/FriendActivityCard";
+import {
+  friends,
+  getDashboardSummary,
+  getWeeklyMinutes,
+} from "@/features/friends/data";
 
 const Friends = () => {
-  const renderItem = ({ item }) => {
-    const meta =
-      item.time || item.calories
-        ? `${item.activity} • ${item.time} • ${item.calories}`
-        : item.activity;
-
-    return (
-      <TouchableOpacity
-        activeOpacity={0.88}
-        style={styles.card}
-        onPress={() =>
-          router.push({
-            pathname: "/friendsdetails",
-            params: { name: item.name },
-          })
-        }
-      >
-        <View style={styles.cardTop}>
-          <View
-            style={[
-              styles.avatarCircle,
-              { backgroundColor: `${item.accent}15` },
-            ]}
-          >
-            <Text style={[styles.avatarText, { color: item.accent }]}>
-              {item.name.charAt(0)}
-            </Text>
-          </View>
-
-          <View style={styles.cardTextWrap}>
-            <Text style={styles.name}>{item.name}</Text>
-            <Text style={styles.meta}>{meta}</Text>
-          </View>
-
-          <AntDesign name="right" size={16} color="#9ca3af" />
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={styles.statPill}>
-            <Text style={[styles.statNumber, { color: item.accent }]}>
-              {item.likes}
-            </Text>
-            <Text style={styles.statLabel}>likes</Text>
-          </View>
-
-          <View style={styles.statPill}>
-            <Text style={[styles.statNumber, { color: item.accent }]}>
-              {item.comments}
-            </Text>
-            <Text style={styles.statLabel}>comments</Text>
-          </View>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const summary = getDashboardSummary();
+  const mostActiveFriend = [...friends].sort(
+    (a, b) => getWeeklyMinutes(b) - getWeeklyMinutes(a)
+  )[0];
 
   return (
     <>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <CustomSafeArea>
+      <CustomSafeArea bgColour="#050505">
         <View style={styles.container}>
           <View style={styles.header}>
             <View>
               <Text style={styles.heading}>Friends Activity</Text>
               <Text style={styles.subheading}>
-                See what your friends have been up to
+                Track recent rides, shared progress, and weekly momentum
               </Text>
             </View>
 
@@ -122,10 +38,42 @@ const Friends = () => {
             </TouchableOpacity>
           </View>
 
+          <View style={styles.summaryPanel}>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Friends</Text>
+              <Text style={styles.summaryValue}>{summary.totalFriends}</Text>
+            </View>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Weekly mins</Text>
+              <Text style={styles.summaryValue}>{summary.totalWeeklyMinutes}</Text>
+            </View>
+            <View style={styles.summaryCard}>
+              <Text style={styles.summaryLabel}>Engagement</Text>
+              <Text style={styles.summaryValue}>{summary.totalLikes}</Text>
+            </View>
+          </View>
+
+          {mostActiveFriend ? (
+            <View style={styles.highlightCard}>
+              <View style={styles.highlightTop}>
+                <Text style={styles.highlightEyebrow}>Most active this week</Text>
+                <Text style={styles.highlightName}>{mostActiveFriend.name}</Text>
+              </View>
+              <Text style={styles.highlightCopy}>
+                {mostActiveFriend.latestWorkout.title} • {getWeeklyMinutes(mostActiveFriend)} minutes this week
+              </Text>
+            </View>
+          ) : null}
+
           <FlatList
-            data={friendsActivity}
+            data={friends}
             keyExtractor={(item) => item.id}
-            renderItem={renderItem}
+            renderItem={({ item }) => (
+              <FriendActivityCard
+                friend={item}
+                onPress={() => router.push(`/friendsdetails/${item.id}`)}
+              />
+            )}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.listContent}
             ListFooterComponent={<View style={{ height: 24 }} />}
@@ -147,7 +95,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 22,
+    marginBottom: 18,
   },
   heading: {
     color: "white",
@@ -158,6 +106,7 @@ const styles = StyleSheet.create({
     color: "#9ca3af",
     fontSize: 13,
     marginTop: 4,
+    maxWidth: 240,
   },
   headerButton: {
     width: 44,
@@ -169,72 +118,61 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  listContent: {
-    paddingBottom: 10,
-  },
-  card: {
-    backgroundColor: "#0b0b0b",
-    borderRadius: 20,
-    padding: 18,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: "#1a1a1a",
-    shadowColor: "#000",
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 6,
-  },
-  cardTop: {
+  summaryPanel: {
     flexDirection: "row",
-    alignItems: "center",
+    gap: 10,
+    marginBottom: 14,
   },
-  avatarCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: "center",
-    justifyContent: "center",
-    marginRight: 14,
-  },
-  avatarText: {
-    fontSize: 20,
-    fontWeight: "700",
-  },
-  cardTextWrap: {
+  summaryCard: {
     flex: 1,
+    backgroundColor: "#101014",
+    borderRadius: 18,
+    borderWidth: 1,
+    borderColor: "#1c1c22",
+    padding: 14,
   },
-  name: {
+  summaryLabel: {
+    color: "#8b8b95",
+    fontSize: 12,
+    marginBottom: 8,
+  },
+  summaryValue: {
     color: "white",
     fontSize: 20,
     fontWeight: "700",
-    marginBottom: 4,
   },
-  meta: {
-    color: "#9ca3af",
-    fontSize: 14,
+  highlightCard: {
+    backgroundColor: "#101014",
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#1c1c22",
+    padding: 16,
+    marginBottom: 16,
+  },
+  highlightTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    gap: 12,
+  },
+  highlightEyebrow: {
+    color: "#fca5a5",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  highlightName: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  highlightCopy: {
+    color: "#a1a1aa",
+    fontSize: 13,
+    marginTop: 8,
     lineHeight: 20,
   },
-  statsRow: {
-    flexDirection: "row",
-    gap: 10,
-    marginTop: 16,
-  },
-  statPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "#181818",
-    borderRadius: 999,
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-  },
-  statNumber: {
-    fontSize: 13,
-    fontWeight: "700",
-    marginRight: 4,
-  },
-  statLabel: {
-    color: "#9ca3af",
-    fontSize: 13,
+  listContent: {
+    paddingBottom: 10,
   },
 });
 

@@ -1,63 +1,57 @@
-import React, { useState } from "react";
-import { View, Text, FlatList, Image, TouchableOpacity } from "react-native";
+import React from "react";
+import { View, Text, FlatList, TouchableOpacity } from "react-native";
+import AntDesign from "@expo/vector-icons/AntDesign";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import { router } from "expo-router";
-const initialFriends = [
-  {
-    id: 1,
-    name: "Jordan Anderson",
-    photo: "https://i.pravatar.cc/150?img=12",
-    email: "jordan@example.com",
-    dob: "1995-04-12",
-  },
-  {
-    id: 2,
-    name: "Aviksha Vidya",
-    photo: "https://i.pravatar.cc/150?img=5",
-    email: "aviksha@example.com",
-    dob: "1998-09-28",
-  },
-  {
-    id: 3,
-    name: "Karan Kapoor",
-    photo: "https://i.pravatar.cc/150?img=20",
-    email: "karan@example.com",
-    dob: "1993-07-22",
-  },
-  {
-    id: 4,
-    name: "Alicia Chen",
-    photo: "https://i.pravatar.cc/150?img=24",
-    email: "alicia@example.com",
-    dob: "1996-01-17",
-  },
-];
+import FriendAvatar from "@/features/friends/components/FriendAvatar";
+import { friends } from "@/features/friends/data";
 
 const FriendsList = () => {
-  const [friends] = useState(initialFriends);
-
   return (
-    <CustomSafeArea>
-      <View className="mt-5">
-        <Text className="text-black text-4xl font-bold mb-2 pl-2">Friends</Text>
+    <CustomSafeArea bgColour="#050505">
+      <View className="flex-1 px-5 pt-4 bg-[#050505]">
+        <View className="flex-row items-center justify-between mb-5">
+          <View>
+            <Text className="text-white text-3xl font-bold">All Friends</Text>
+            <Text className="text-[#9ca3af] mt-1">
+              Browse the full friend directory
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            onPress={() => router.back()}
+            className="w-11 h-11 rounded-2xl bg-[#111113] border border-[#202024] items-center justify-center"
+          >
+            <AntDesign name="arrowleft" size={18} color="white" />
+          </TouchableOpacity>
+        </View>
+
         <FlatList
           data={friends}
-          keyExtractor={(item) => item.id.toString()}
+          keyExtractor={(item) => item.id}
           numColumns={2}
-          contentContainerStyle={{ padding: 10, gap: 10 }}
+          columnWrapperStyle={{ gap: 12 }}
+          contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
           renderItem={({ item }) => (
             <TouchableOpacity
+              activeOpacity={0.9}
               onPress={() => {
-                router.push(`friendsdetails/${item.id}`);
+                router.push(`/friendsdetails/${item.id}`);
               }}
-              className="bg-green-500 rounded-xl items-center m-2 py-5 flex-1 shadow-md"
+              className="flex-1 rounded-[24px] bg-[#101014] border border-[#1c1c22] items-center py-5 px-3"
+              style={{
+                shadowColor: "#000",
+                shadowOpacity: 0.25,
+                shadowRadius: 14,
+                elevation: 4,
+              }}
             >
-              <Image
-                source={{ uri: item.photo }}
-                className="w-20 h-20 rounded-full mb-2"
-              />
-              <Text className="text-white text-base font-semibold">
+              <FriendAvatar friend={item} size={72} showRing />
+              <Text className="text-white text-base font-semibold text-center mt-3">
                 {item.name}
+              </Text>
+              <Text className="text-[#8b8b95] text-xs text-center mt-1">
+                {item.latestWorkout.title}
               </Text>
             </TouchableOpacity>
           )}
