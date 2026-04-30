@@ -19,6 +19,13 @@ const quickStats = [
 
 const secondaryTiles = [
   {
+    title: "Leaderboard",
+    subtitle: "See who leads this week",
+    link: "/leaderboard",
+    wide: true,
+    icon: <MaterialIcons name="leaderboard" size={32} color="#EB7363" />,
+  },
+  {
     title: "Groups",
     subtitle: "Join ride groups",
     link: "/groups",
@@ -80,7 +87,7 @@ const SmallTile = ({ item }) => {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => router.push(item.link)}
-      className="w-[48.5%] bg-[#15171C] rounded-2xl p-4 min-h-[140px] justify-between"
+      className={`${item.wide ? "w-full min-h-[150px]" : "w-[48.5%] min-h-[140px]"} bg-[#15171C] rounded-2xl p-4 justify-between`}
     >
       <View>{item.icon}</View>
 
@@ -168,4 +175,3 @@ const Home = () => {
 };
 
 export default Home;
-

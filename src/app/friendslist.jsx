@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   View,
   Text,
@@ -12,45 +12,7 @@ import { router } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-
-const initialFriends = [
-  {
-    id: 1,
-    name: "Jordan Anderson",
-    photo: "https://i.pravatar.cc/150?img=12",
-    email: "jordan@example.com",
-    dob: "1995-04-12",
-    status: "Online",
-    rides: 24,
-  },
-  {
-    id: 2,
-    name: "Aviksha Vidya",
-    photo: "https://i.pravatar.cc/150?img=5",
-    email: "aviksha@example.com",
-    dob: "1998-09-28",
-    status: "Active",
-    rides: 18,
-  },
-  {
-    id: 3,
-    name: "Karan Kapoor",
-    photo: "https://i.pravatar.cc/150?img=20",
-    email: "karan@example.com",
-    dob: "1993-07-22",
-    status: "Offline",
-    rides: 31,
-  },
-  {
-    id: 4,
-    name: "Alicia Chen",
-    photo: "https://i.pravatar.cc/150?img=24",
-    email: "alicia@example.com",
-    dob: "1996-01-17",
-    status: "Online",
-    rides: 27,
-  },
-];
+import { initialFriends } from "../../friendsdata/data";
 
 const getStatusStyle = (status) => {
   switch (status) {
@@ -113,7 +75,7 @@ const FriendCard = ({ item }) => {
 };
 
 const FriendsList = () => {
-  const [friends] = useState(initialFriends);
+  const friends = initialFriends;
 
   return (
     <CustomSafeArea bgColour="#0B0F1A">
@@ -200,4 +162,3 @@ const FriendsList = () => {
 };
 
 export default FriendsList;
-
