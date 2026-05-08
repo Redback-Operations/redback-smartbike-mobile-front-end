@@ -78,6 +78,13 @@ const _layout = () => {
               headerTintColor: "white",
             }}
           />
+
+          <Stack.Screen
+            name="leaderboard"
+            options={{
+              headerShown: false,
+            }}
+          />
         </Stack>
       </AuthProvider>
     </>
