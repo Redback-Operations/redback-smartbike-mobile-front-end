@@ -13,7 +13,7 @@ import "../../global.css";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TextInputWithLogo from "@/components/TextInputWithLogo";
 import LoginIcon from "@/components/LoginIcon";
-import { Link, router, useNavigation } from "expo-router";
+import { Link, router } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
 import { AuthContext } from "@/context/authContext";
@@ -118,6 +118,11 @@ const index = () => {
                 </Text>
               </Link>
             </Text>
+            <TouchableOpacity onPress={() => router.replace("/dashboard")} className="self-center mt-2">
+              <Text className="text-white text-sm underline opacity-70">
+                View dashboard without signing in
+              </Text>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </LinearGradient>
