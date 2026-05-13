@@ -1,3 +1,25 @@
+/**
+ * dashboard.jsx — SmartBike VR Analytics Dashboard
+ *
+ * A standalone screen accessible without authentication that presents
+ * four tabs of SmartBike session analytics using synthetic data.
+ * All static values in this file are placeholders — replace them with
+ * real API calls once the backend session endpoints are available.
+ *
+ * Tabs:
+ *   1. Overview      — trimester KPIs, weekly sessions, team delivery,
+ *                      mission completion rates, top-5 riders leaderboard
+ *   2. Performance   — speed trend, speed distribution, calories by
+ *                      resistance level, brake events per session
+ *   3. Engagement    — session frequency heatmap, mission play counts,
+ *                      avg session duration per mission
+ *   4. System Health — MQTT latency with spike detection, connection
+ *                      stability gauges, disconnect events, sensor errors
+ *
+ * Entry point: route /dashboard (expo-router file-based routing)
+ * Accessible from the login screen via "View dashboard without signing in".
+ */
+
 import React, { useState } from "react";
 import {
   View,
@@ -10,48 +32,77 @@ import {
 } from "react-native";
 import { LineChart, BarChart } from "react-native-gifted-charts";
 
+// ── Layout constants ──────────────────────────────────────────────
+// All pixel widths are derived from the physical screen width so the
+// layout adapts to any device without media queries.
+
 const { width: screenWidth } = Dimensions.get("window");
-const PADDING = 16;
-const GAP = 8;
-const avail = screenWidth - PADDING * 2;
-const col2 = Math.floor((avail - GAP) * 2 / 3);
-const col1 = Math.floor((avail - GAP) / 3);
-const colHalf = Math.floor((avail - GAP) / 2);
-const CARD_W = Math.floor((avail - GAP) / 2);
-const PH = 12; // panel horizontal padding
+const PADDING = 16;  // outer horizontal padding for the screen
+const GAP = 8;       // gap between side-by-side panels
+
+const avail = screenWidth - PADDING * 2;          // usable row width
+const col2 = Math.floor((avail - GAP) * 2 / 3);  // wide column in a 2:1 row
+const col1 = Math.floor((avail - GAP) / 3);       // narrow column in a 2:1 row
+const colHalf = Math.floor((avail - GAP) / 2);    // each column in a 1:1 row
+const CARD_W = Math.floor((avail - GAP) / 2);     // width of a KPI card in a 2-col grid
+
+const PH = 12; // horizontal padding inside each Panel card
+
+// Chart widths subtract the panel's left + right padding so charts
+// never overflow their containing card.
 const chartCol2 = col2 - PH * 2;
 const chartCol1 = col1 - PH * 2;
 const chartHalf = colHalf - PH * 2;
 
+// ── Design tokens ─────────────────────────────────────────────────
+// Central colour palette. Update these values to retheme the entire
+// dashboard without touching individual components.
+
 const C = {
-  bg: "#f5f4f0",
-  card: "#ffffff",
-  border: "#d3d1c7",
-  panelBg: "#f1efe8",
-  text: "#1a1a18",
-  muted: "#888780",
-  faint: "#b4b2a9",
+  bg: "#f5f4f0",       // screen background (warm off-white)
+  card: "#ffffff",     // panel / card surface
+  border: "#d3d1c7",   // subtle border between elements
+  panelBg: "#f1efe8",  // inset background used inside panels (e.g. chart rules, placeholders)
+  text: "#1a1a18",     // primary body text
+  muted: "#888780",    // secondary / label text
+  faint: "#b4b2a9",    // tertiary / hint text
+
+  // Green family — used for positive deltas and primary chart fill
   green: "#1D9E75",
   greenDark: "#0F6E56",
   greenMid: "#5DCAA5",
   greenLight: "#9FE1CB",
-  greenBg: "#E1F5EE",
-  greenText: "#0F6E56",
+  greenBg: "#E1F5EE",   // badge background
+  greenText: "#0F6E56", // badge foreground
+
+  // Amber — used for flat/warning deltas and spike highlights
   amber: "#BA7517",
   amberBg: "#FAEEDA",
   amberText: "#854F0B",
   amberFill: "#EF9F27",
+
+  // Red — used for negative deltas and error states
   red: "#A32D2D",
   redBg: "#FCEBEB",
   redFill: "#E24B4A",
+
+  // Accent colours for per-mission differentiation
   purple: "#AFA9EC",
   orange: "#F0997B",
   blue: "#85B7EB",
-  spike: "#D85A30",
+
+  spike: "#D85A30", // MQTT latency spike bars
 };
 
-// ── Data ──────────────────────────────────────────────────────────
+// ── Synthetic data ────────────────────────────────────────────────
+// Replace each constant below with an API fetch / hook when the
+// backend is ready. The shape of each array matches what the chart
+// components expect, so only the source needs to change.
 
+// --- Overview tab ---
+
+// KPI cards: label shown above the value, delta shown below in colour
+// type: "up" = green, "warn" = amber, "down" = red, "neutral" = grey
 const overviewKpis = [
   { label: "Total Sessions", value: "482", delta: "↑ 18% vs T1", type: "up" },
   { label: "Active Users", value: "47", delta: "↑ 6 new users", type: "up" },
@@ -60,11 +111,13 @@ const overviewKpis = [
   { label: "System Health Score", value: "94%", delta: "↑ 3 pts", type: "up" },
 ];
 
+// Weekly session counts — bar colour encodes volume tier
 const weeklyData = [12, 18, 15, 24, 22, 29, 32, 26, 36, 34, 31, 40].map(v => ({
   value: v,
   frontColor: v >= 30 ? C.green : v >= 20 ? C.greenMid : C.greenLight,
 }));
 
+// Horizontal bar chart — completion % per VR mission
 const missionCompletion = [
   { name: "Forest Trail", pct: 84, color: C.green },
   { name: "Mountain Peak", pct: 61, color: C.blue },
@@ -73,6 +126,7 @@ const missionCompletion = [
   { name: "Desert Storm", pct: 55, color: C.orange },
 ];
 
+// Leaderboard table — top 5 users by total distance ridden
 const topRiders = [
   { rank: 1, user: "U012", km: 184, sessions: 22 },
   { rank: 2, user: "U034", km: 161, sessions: 18 },
@@ -81,6 +135,8 @@ const topRiders = [
   { rank: 5, user: "U041", km: 119, sessions: 12 },
 ];
 
+// --- Performance tab ---
+
 const performanceKpis = [
   { label: "Avg Speed", value: "24.3 km/h", delta: "↑ 1.2 km/h", type: "up" },
   { label: "Avg Distance", value: "13.7 km", delta: "↑ 0.9 km", type: "up" },
@@ -88,10 +144,12 @@ const performanceKpis = [
   { label: "Top Speed Record", value: "42.1 km/h", delta: "U012 · 8 Apr", type: "neutral" },
 ];
 
+// Rolling 7-day average speed — one point per session date
 const speedTrend = [21, 23, 22, 25, 24, 27, 26, 28, 25, 29, 30, 28].map(v => ({
   value: v, dataPointColor: C.green,
 }));
 
+// Speed distribution histogram — sessions bucketed in 5 km/h bins
 const speedDist = [
   { value: 3, label: "<15", frontColor: C.greenLight },
   { value: 12, label: "15-20", frontColor: C.greenLight },
@@ -101,6 +159,7 @@ const speedDist = [
   { value: 7, label: ">35", frontColor: C.greenLight },
 ];
 
+// Average calories burned per session at each resistance level (2–10)
 const caloriesByResist = [
   { value: 180, label: "2", frontColor: C.greenLight },
   { value: 210, label: "4", frontColor: C.greenLight },
@@ -109,14 +168,17 @@ const caloriesByResist = [
   { value: 390, label: "10", frontColor: C.greenDark },
 ];
 
+// Number of brake events recorded per session sample
 const brakeEvents = [
   { value: 4, label: "S1", frontColor: C.greenLight },
   { value: 7, label: "S2", frontColor: C.greenMid },
   { value: 3, label: "S3", frontColor: C.greenLight },
-  { value: 9, label: "S4", frontColor: C.amberFill },
+  { value: 9, label: "S4", frontColor: C.amberFill }, // above-average — amber
   { value: 5, label: "S5", frontColor: C.greenMid },
   { value: 6, label: "S6", frontColor: C.greenMid },
 ];
+
+// --- Engagement tab ---
 
 const engagementKpis = [
   { label: "Sessions/User/Week", value: "2.3", delta: "↑ 0.4", type: "up" },
@@ -125,6 +187,7 @@ const engagementKpis = [
   { label: "Most Popular Mission", value: "Forest Trail", delta: "148 plays", type: "up" },
 ];
 
+// Total play count per mission — drives the horizontal bar chart
 const missionPlays = [
   { name: "Forest Trail", value: 148, color: C.green },
   { name: "City Sprint", value: 122, color: C.greenMid },
@@ -133,15 +196,18 @@ const missionPlays = [
   { name: "Desert Storm", value: 31, color: C.orange },
 ];
 
+// Heatmap: rows = time-of-day [AM, PM, Eve], cols = day [Mon–Sun]
+// Cell values 0–4 map to hmColors (0 = no activity, 4 = peak activity)
 const heatmapData = [
-  [1, 2, 1, 2, 1, 3, 3],
-  [3, 4, 3, 2, 3, 1, 1],
-  [4, 3, 4, 3, 2, 1, 2],
+  [1, 2, 1, 2, 1, 3, 3], // AM
+  [3, 4, 3, 2, 3, 1, 1], // PM
+  [4, 3, 4, 3, 2, 1, 2], // Eve
 ];
 const heatmapDays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const heatmapTimes = ["AM", "PM", "Eve"];
-const hmColors = ["#f1efe8", "#C8EFE1", "#9FE1CB", "#5DCAA5", "#1D9E75"];
+const hmColors = ["#f1efe8", "#C8EFE1", "#9FE1CB", "#5DCAA5", "#1D9E75"]; // index = intensity
 
+// Average session duration (minutes) per mission type
 const missionDuration = [
   { value: 38, label: "Forest", frontColor: C.green },
   { value: 28, label: "City", frontColor: C.greenMid },
@@ -150,6 +216,8 @@ const missionDuration = [
   { value: 18, label: "Desert", frontColor: C.orange },
 ];
 
+// --- System Health tab ---
+
 const systemKpis = [
   { label: "Avg MQTT Delay", value: "112 ms", delta: "↓ 38ms vs T1", type: "up" },
   { label: "Peak MQTT Delay", value: "1,840 ms", delta: "Bluetooth spike", type: "warn" },
@@ -157,20 +225,23 @@ const systemKpis = [
   { label: "Sensor Error Rate", value: "1.4%", delta: "↓ 0.6%", type: "up" },
 ];
 
+// Raw MQTT round-trip times in ms — bars > 500 ms are coloured as spikes
 const mqttData = [80, 100, 72, 120, 88, 1840, 112, 80, 140, 96, 72, 1200, 88, 76, 120, 84, 100, 80, 68, 92].map(v => ({
   value: v,
   frontColor: v > 500 ? C.spike : C.greenMid,
 }));
 
+// Weekly count of full connection drops (Bluetooth/WiFi disconnects)
 const disconnectData = [
   { value: 3, label: "W1", frontColor: C.greenMid },
   { value: 5, label: "W2", frontColor: C.greenMid },
   { value: 2, label: "W3", frontColor: C.greenMid },
-  { value: 8, label: "W4", frontColor: C.amberFill },
+  { value: 8, label: "W4", frontColor: C.amberFill }, // elevated — amber
   { value: 4, label: "W5", frontColor: C.greenMid },
   { value: 1, label: "W6", frontColor: C.greenMid },
 ];
 
+// Sensor error rates by sensor type — badge colour encodes severity
 const sensorErrors = [
   { name: "Speed sensor", value: "0.7%", type: "amber" },
   { name: "Resistance sensor", value: "0.3%", type: "green" },
@@ -178,8 +249,12 @@ const sensorErrors = [
   { name: "MQTT disconnects", value: "0.4%", type: "green" },
 ];
 
-// ── Small components ──────────────────────────────────────────────
+// ── Reusable UI components ────────────────────────────────────────
+// Each component below is a pure presentational building block with
+// no internal state. They accept only the props they render and are
+// intentionally kept small so they can be reused across all four tabs.
 
+// Coloured pill label — green / amber / red
 function Badge({ label, type }) {
   const map = {
     green: { bg: C.greenBg, color: C.greenText },
@@ -194,10 +269,12 @@ function Badge({ label, type }) {
   );
 }
 
+// Small uppercase section heading displayed above a group of panels
 function SectionLabel({ text }) {
   return <Text style={s.sectionLabel}>{text}</Text>;
 }
 
+// A single KPI tile — label + headline value + optional coloured delta
 function KpiCard({ label, value, delta, type, cardStyle }) {
   const dc = { up: C.green, warn: C.amber, down: C.red, neutral: C.faint }[type] || C.faint;
   return (
@@ -209,6 +286,8 @@ function KpiCard({ label, value, delta, type, cardStyle }) {
   );
 }
 
+// White rounded card that wraps any chart or list content.
+// Pass flex={n} to make it grow/shrink inside a Row.
 function Panel({ children, flex, style }) {
   return (
     <View style={[s.panel, flex !== undefined && { flex }, style]}>
@@ -217,6 +296,7 @@ function Panel({ children, flex, style }) {
   );
 }
 
+// Uppercase panel title + optional Badge aligned to the right
 function PanelHeader({ title, badge, badgeType }) {
   return (
     <View style={s.panelHeader}>
@@ -226,6 +306,8 @@ function PanelHeader({ title, badge, badgeType }) {
   );
 }
 
+// Horizontal gauge bar — used for team delivery and connection status
+// pct: 0–100, rendered as a percentage-width filled bar
 function HBar({ label, pct, color, labelColor }) {
   return (
     <View style={s.hbarRow}>
@@ -238,6 +320,8 @@ function HBar({ label, pct, color, labelColor }) {
   );
 }
 
+// Horizontal mission bar — supports both raw count (value/max) and
+// direct percentage (pct) so it works for both completion and play count
 function MBar({ name, pct, value, max, color }) {
   const fill = value !== undefined ? Math.round((value / max) * 100) : pct;
   const display = value !== undefined ? String(value) : `${pct}%`;
@@ -252,6 +336,9 @@ function MBar({ name, pct, value, max, color }) {
   );
 }
 
+// Grey placeholder box shown where a chart type is not yet implemented
+// (e.g. scatter plot, stacked bar). Replace with a real chart component
+// once the relevant library or data is available.
 function ChartPlaceholder({ label, height = 80 }) {
   return (
     <View style={[s.placeholder, { height }]}>
@@ -260,14 +347,18 @@ function ChartPlaceholder({ label, height = 80 }) {
   );
 }
 
+// Small footnote text rendered below a chart
 function Note({ children }) {
   return <Text style={s.note}>{children}</Text>;
 }
 
+// Lays out two Panels side by side with a GAP between them
 function Row({ children, style }) {
   return <View style={[s.row, style]}>{children}</View>;
 }
 
+// 2×2 grid of KPI cards — used by Performance, Engagement, System Health
+// Each card is half the available width so exactly two fit per row
 function KpiGrid4({ kpis }) {
   return (
     <View style={s.kpiGrid4}>
@@ -278,15 +369,20 @@ function KpiGrid4({ kpis }) {
   );
 }
 
+// Session frequency heatmap — a 3-row (AM/PM/Eve) × 7-col (Mon–Sun) grid.
+// Cell colour is looked up from hmColors using the intensity value (0–4)
+// stored in heatmapData.
 function Heatmap() {
   return (
     <View>
+      {/* Day-of-week header row */}
       <View style={s.hmRow}>
         <Text style={s.hmTime} />
         {heatmapDays.map(d => (
           <Text key={d} style={s.hmDay}>{d}</Text>
         ))}
       </View>
+      {/* One row per time-of-day band */}
       {heatmapData.map((row, ri) => (
         <View key={ri} style={s.hmRow}>
           <Text style={s.hmTime}>{heatmapTimes[ri]}</Text>
@@ -300,18 +396,24 @@ function Heatmap() {
   );
 }
 
-// ── Tab content ───────────────────────────────────────────────────
+// ── Tab screens ───────────────────────────────────────────────────
+// Each tab is a self-contained ScrollView. To connect real data,
+// replace the static arrays above with API responses and pass them
+// as props (or via context / a hook) into the relevant tab.
 
 function OverviewTab() {
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.tabContent}>
       <SectionLabel text="KEY METRICS · THIS TRIMESTER" />
+
+      {/* 5 KPI cards in a horizontally scrollable strip */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ marginBottom: GAP }}>
         {overviewKpis.map(k => (
           <KpiCard key={k.label} {...k} cardStyle={{ minWidth: 120, marginRight: GAP }} />
         ))}
       </ScrollView>
 
+      {/* Sessions per week (2/3 width) + Team delivery gauges (1/3 width) */}
       <Row>
         <Panel flex={2} style={{ marginRight: GAP }}>
           <PanelHeader title="Sessions per week" badge="Jan–Apr 2026" />
@@ -341,6 +443,7 @@ function OverviewTab() {
         </Panel>
       </Row>
 
+      {/* Mission completion horizontal bars + Top 5 riders table */}
       <Row>
         <Panel flex={1} style={{ marginRight: GAP }}>
           <PanelHeader title="Mission completion rate by mission" />
@@ -376,6 +479,7 @@ function PerformanceTab() {
       <SectionLabel text="RIDER PERFORMANCE METRICS" />
       <KpiGrid4 kpis={performanceKpis} />
 
+      {/* Speed trend line (2/3) + Speed distribution histogram (1/3) */}
       <Row>
         <Panel flex={2} style={{ marginRight: GAP }}>
           <PanelHeader title="Avg speed trend over time" badge="Line chart" />
@@ -419,6 +523,7 @@ function PerformanceTab() {
         </Panel>
       </Row>
 
+      {/* Calories by resistance (1/2) + Brake events (1/2) */}
       <Row>
         <Panel flex={1} style={{ marginRight: GAP }}>
           <PanelHeader title="Calories by resistance level" />
@@ -462,6 +567,7 @@ function PerformanceTab() {
         </Panel>
       </Row>
 
+      {/* Scatter plot placeholder — requires a dedicated scatter chart library */}
       <Panel style={{ marginBottom: GAP }}>
         <PanelHeader title="Distance vs Duration" />
         <ChartPlaceholder label="Scatter plot — distance (km) vs duration (min)" height={70} />
@@ -476,6 +582,7 @@ function EngagementTab() {
       <SectionLabel text="USER ENGAGEMENT & GAMIFICATION" />
       <KpiGrid4 kpis={engagementKpis} />
 
+      {/* Session frequency heatmap (1/2) + New vs returning placeholder (1/2) */}
       <Row>
         <Panel flex={1} style={{ marginRight: GAP }}>
           <PanelHeader title="Session frequency heatmap" badge="Day × Hour" badgeType="amber" />
@@ -483,10 +590,12 @@ function EngagementTab() {
         </Panel>
         <Panel flex={1}>
           <PanelHeader title="New vs returning users per week" />
+          {/* Stacked bar requires additional setup — placeholder until implemented */}
           <ChartPlaceholder label="Stacked bar — New (green) vs Returning (teal)" height={100} />
         </Panel>
       </Row>
 
+      {/* Mission play count bars (1/2) + Avg duration per mission bar chart (1/2) */}
       <Row>
         <Panel flex={1} style={{ marginRight: GAP }}>
           <PanelHeader title="Mission play count" />
@@ -525,6 +634,7 @@ function SystemHealthTab() {
       <SectionLabel text="SYSTEM & CONNECTIVITY METRICS" />
       <KpiGrid4 kpis={systemKpis} />
 
+      {/* MQTT latency bar chart (2/3) — spikes coloured orange — + Connection gauges (1/3) */}
       <Row>
         <Panel flex={2} style={{ marginRight: GAP }}>
           <PanelHeader title="MQTT delay over time" badge="Spikes flagged" badgeType="red" />
@@ -552,6 +662,7 @@ function SystemHealthTab() {
         </Panel>
       </Row>
 
+      {/* Weekly disconnect events bar chart (1/2) + Sensor error list (1/2) */}
       <Row>
         <Panel flex={1} style={{ marginRight: GAP }}>
           <PanelHeader title="Disconnect events per week" />
@@ -586,15 +697,21 @@ function SystemHealthTab() {
   );
 }
 
-// ── Root ──────────────────────────────────────────────────────────
+// ── Root component ────────────────────────────────────────────────
+// Manages which tab is active and renders the header + tab bar that
+// are shared across all four views. Tab switching uses conditional
+// rendering (not a navigator) to avoid remounting chart libraries
+// on every switch.
 
 const TABS = ["Overview", "Performance", "Engagement", "System Health"];
 
 export default function Dashboard() {
-  const [active, setActive] = useState(0);
+  const [active, setActive] = useState(0); // index of the currently visible tab
 
   return (
     <SafeAreaView style={s.safe}>
+
+      {/* ── Header bar ── */}
       <View style={s.topBar}>
         <View style={s.logoRow}>
           <View style={s.logoDot}>
@@ -608,6 +725,7 @@ export default function Dashboard() {
         <Badge label="System Healthy" type="green" />
       </View>
 
+      {/* ── Tab bar ── */}
       <View style={s.tabBar}>
         {TABS.map((tab, i) => (
           <TouchableOpacity
@@ -620,12 +738,14 @@ export default function Dashboard() {
         ))}
       </View>
 
+      {/* ── Tab content ── */}
       <View style={{ flex: 1 }}>
         {active === 0 && <OverviewTab />}
         {active === 1 && <PerformanceTab />}
         {active === 2 && <EngagementTab />}
         {active === 3 && <SystemHealthTab />}
       </View>
+
     </SafeAreaView>
   );
 }
@@ -687,6 +807,7 @@ const s = StyleSheet.create({
     marginBottom: 8,
   },
 
+  // KPI cards
   kpiCard: {
     backgroundColor: C.card,
     borderWidth: 0.5,
@@ -710,6 +831,7 @@ const s = StyleSheet.create({
   kpiValue: { fontSize: 17, fontWeight: "500", color: C.text, lineHeight: 21 },
   kpiDelta: { fontSize: 10, marginTop: 2 },
 
+  // Panel card
   panel: {
     backgroundColor: C.card,
     borderWidth: 0.5,
@@ -737,6 +859,7 @@ const s = StyleSheet.create({
 
   row: { flexDirection: "row", marginBottom: GAP },
 
+  // Horizontal gauge bar (team delivery, connection status)
   hbarRow: { flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 5 },
   hbarLabel: { fontSize: 9, color: C.muted, width: 44 },
   hbarTrack: {
@@ -749,6 +872,7 @@ const s = StyleSheet.create({
   hbarFill: { height: "100%", borderRadius: 4 },
   hbarPct: { fontSize: 9, color: C.muted, width: 26, textAlign: "right" },
 
+  // Mission / play-count horizontal bar
   mbarRow: { flexDirection: "row", alignItems: "center", gap: 5, marginBottom: 5 },
   mbarName: { fontSize: 9, color: C.muted, width: 68 },
   mbarTrack: {
@@ -761,6 +885,7 @@ const s = StyleSheet.create({
   mbarFill: { height: "100%", borderRadius: 3 },
   mbarVal: { fontSize: 9, color: C.muted, width: 24, textAlign: "right" },
 
+  // Top-riders table
   tableHead: {
     flexDirection: "row",
     borderBottomWidth: 0.5,
@@ -779,11 +904,13 @@ const s = StyleSheet.create({
   tdRank: { fontSize: 9, color: C.faint, fontWeight: "500" },
   tdCell: { fontSize: 10, color: C.muted },
 
+  // Session frequency heatmap grid
   hmRow: { flexDirection: "row", alignItems: "center", marginBottom: 2 },
   hmTime: { fontSize: 8, color: C.faint, width: 22 },
   hmDay: { fontSize: 8, color: C.faint, flex: 1, textAlign: "center" },
   hmCell: { flex: 1, height: 14, borderRadius: 2, marginHorizontal: 1 },
 
+  // Placeholder for unimplemented chart types
   placeholder: {
     backgroundColor: C.panelBg,
     borderRadius: 4,
@@ -798,6 +925,7 @@ const s = StyleSheet.create({
   badge: { borderRadius: 4, paddingHorizontal: 5, paddingVertical: 2 },
   badgeText: { fontSize: 9, fontWeight: "500" },
 
+  // Sensor error list rows
   sensorRow: {
     flexDirection: "row",
     justifyContent: "space-between",
