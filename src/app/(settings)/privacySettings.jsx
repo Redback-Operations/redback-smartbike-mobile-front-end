@@ -127,7 +127,6 @@ const PrivacySettings = () => {
           <TouchableOpacity
             className="mt-6 bg-[#7c3aed] py-4 rounded-xl items-center"
             onPress={() => {
-              console.log("Saved settings");
               router.replace("/settings");
             }}
           >
