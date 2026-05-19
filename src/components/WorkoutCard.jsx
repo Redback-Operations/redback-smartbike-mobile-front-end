@@ -16,7 +16,7 @@ const WorkoutCard = ({
     <TouchableOpacity
       id="title"
       onPress={handlePress}
-      className="flex-1 transition-all  aspect-video rounded-xl overflow-hidden"
+      className="flex-1 aspect-video rounded-xl overflow-hidden"
     >
       <LinearGradient
         colors={[bgColor, `${bgColor}60`]}
