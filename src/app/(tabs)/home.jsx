@@ -4,6 +4,7 @@ import Avatar from "@/components/Avatar";
 import LastWeekActivity from "@/components/LastWeekActivity";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import HomeScreenTile from "@/components/HomeScreenTile";
+import AIInsights from "@/components/AIInsights";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AuthContext } from "@/context/authContext";
@@ -59,6 +60,7 @@ const Home = () => {
         {/* Last Week Activity */}
         <LastWeekActivity />
 
+<AIInsights username={user.username ? user.username : "Rider"} />
         <FlatList
           nestedScrollEnabled
           columnWrapperClassName="gap-4"
