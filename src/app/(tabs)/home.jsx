@@ -1,15 +1,21 @@
 import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import React, { useContext } from "react";
+
 import Avatar from "@/components/Avatar";
 import LastWeekActivity from "@/components/LastWeekActivity";
 import WelcomeMessage from "@/components/WelcomeMessage";
 import HomeScreenTile from "@/components/HomeScreenTile";
+import CustomSafeArea from "@/components/CustomSafeArea";
+
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { AuthContext } from "@/context/authContext";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import CustomSafeArea from "@/components/CustomSafeArea";
+
+import { AuthContext } from "@/context/authContext";
+
+
+import TodayRideSummaryCard from "@/components/TodayRideSummaryCard";
 
 const homeTiles = [
   {
@@ -66,12 +72,26 @@ const Home = () => {
 
         <LastWeekActivity />
 
+
+        <View className="my-4">
+          <TodayRideSummaryCard
+            distanceKm={3.2}
+            durationMin={17}
+            avgSpeedKmh={11.3}
+            caloriesKcal={220}
+            terrain="Forest Trail"
+            goalKm={5.0}
+          />
+        </View>
+
+        {/* Existing grid tiles */}
         <FlatList
           nestedScrollEnabled
           columnWrapperClassName="gap-4"
-          contentContainerClassName="gap-4"
+          contentContainerClassName="gap-4 pb-8"
           numColumns={2}
           data={homeTiles}
+          keyExtractor={(item) => item.title}
           renderItem={({ item }) => <HomeScreenTile item={item} />}
         />
       </View>
