@@ -11,17 +11,19 @@ const AppNavigator = () => {
   useEffect(() => {
     if (loading) return;
 
-    const isAuthScreen =
+    const isAuthOnlyScreen =
       pathname === "/" ||
       pathname === "/signup" ||
       pathname === "/forgot-password";
 
-    if (!user && !isAuthScreen) {
+    const isPublicScreen = pathname === "/dashboard";
+
+    if (!user && !isAuthOnlyScreen && !isPublicScreen) {
       router.replace("/");
       return;
     }
 
-    if (user && isAuthScreen) {
+    if (user && isAuthOnlyScreen) {
       router.replace("/(tabs)/home");
     }
   }, [user, loading, pathname]);
@@ -46,6 +48,7 @@ const AppNavigator = () => {
       <Stack.Screen name="signup" options={{ headerShown: false }} />
       <Stack.Screen name="index" options={{ headerShown: false }} />
       <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
+      <Stack.Screen name="dashboard" options={{ headerShown: false }} />
 
       <Stack.Screen
         name="(scheduleWorkout)"

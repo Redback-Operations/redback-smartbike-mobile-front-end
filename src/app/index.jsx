@@ -102,6 +102,11 @@ const index = () => {
                 </Text>
               </Link>
             </Text>
+            <TouchableOpacity onPress={() => router.replace("/dashboard")} className="self-center mt-2">
+              <Text className="text-white text-sm underline opacity-70">
+                View dashboard without signing in
+              </Text>
+            </TouchableOpacity>
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>
