@@ -12,6 +12,21 @@ export default function FriendDetails() {
     Linking.openURL("https://www.strava.com/"); // or a user-specific Strava link if available
   };
 
+  if (!data) {
+    return (
+      <CustomSafeArea>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-xl text-center font-semibold">
+            Friend not found
+          </Text>
+          <Text className="text-center text-gray-500 mt-2">
+            This friend profile could not be loaded.
+          </Text>
+        </View>
+      </CustomSafeArea>
+    );
+  }
+
   return (
     <CustomSafeArea>
       <View>
