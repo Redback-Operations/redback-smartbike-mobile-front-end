@@ -12,7 +12,7 @@ const TextInputWithLogo = ({
   const [focus, setFocus] = useState(false);
   return (
     <View
-      className={`flex flex-row relative items-center transition-all duration-500 border gap-4 px-6 py-4 rounded-full ${
+      className={`flex flex-row relative items-center border gap-4 px-6 py-4 rounded-full ${
         focus ? "border-brand-purple" : "border-gray-400"
       }`}
     >
@@ -20,9 +20,10 @@ const TextInputWithLogo = ({
 
       <TextInput
         autoCapitalize="none"
+        value={data?.[id] ?? ""}
         onChangeText={(text) => setData({ ...data, [id]: text })}
         secureTextEntry={secure}
-        className="w-full rounded-full"
+        className="flex-1"
         placeholder={placeholder}
         onFocus={() => {
           setFocus(true);

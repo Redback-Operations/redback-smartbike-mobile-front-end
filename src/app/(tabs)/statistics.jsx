@@ -8,11 +8,20 @@ import {
   SafeAreaView,
   StatusBar,
   TouchableOpacity,
+<<<<<<< HEAD
   useWindowDimensions,
 } from 'react-native';
 import { LineChart } from 'react-native-gifted-charts';
 import { LinearGradient } from 'expo-linear-gradient';
 
+=======
+  Dimensions,
+} from 'react-native';
+import { LineChart } from 'react-native-gifted-charts';
+
+const screenWidth = Dimensions.get('window').width;
+
+>>>>>>> upstream/main
 const mockData = [
   { day: 'Mon', minutes: 22 },
   { day: 'Tue', minutes: 48 },
@@ -51,6 +60,10 @@ export default function RedbackWeeklySummary() {
   const [loading, setLoading] = useState(true);
   const [rideData, setRideData] = useState([]);
   const [selectedChart, setSelectedChart] = useState('Minutes');
+<<<<<<< HEAD
+=======
+  
+>>>>>>> upstream/main
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -88,6 +101,7 @@ export default function RedbackWeeklySummary() {
   const currentLineData =
     selectedChart === 'Minutes' ? minutesLineData : caloriesLineData;
 
+<<<<<<< HEAD
   const chartCardHorizontalPadding = 18;
   const chartWidth = screenWidth - 30 - chartCardHorizontalPadding * 2;
 
@@ -96,6 +110,10 @@ export default function RedbackWeeklySummary() {
     pointCount > 1 ? chartWidth / (pointCount - 1) : chartWidth;
 
   const spacing = Math.min(Math.max(usableSpacing, 35), 65);
+=======
+  const chartWidth = screenWidth - 60;
+  const spacing = Math.max(35, chartWidth / currentLineData.length);
+>>>>>>> upstream/main
 
   const peakPoint =
     currentLineData.length > 0
@@ -104,9 +122,16 @@ export default function RedbackWeeklySummary() {
         )
       : null;
 
+<<<<<<< HEAD
   const chartColor = selectedChart === 'Minutes' ? '#ffffff' : '#FFD700';
   const tabActiveColor = selectedChart === 'Minutes' ? '#3A0A50' : '#FFD700';
   const tabActiveTextColor = selectedChart === 'Minutes' ? '#fff' : '#3A0A50';
+=======
+  const chartColor = selectedChart === 'Minutes' ? '#ff7f50' : '#FFD700';
+  const tabActiveColor = selectedChart === 'Minutes' ? '#ff7f50' : '#FFD700';
+  const tabActiveTextColor = selectedChart === 'Minutes' ? '#fff' : '#111';
+  
+>>>>>>> upstream/main
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -121,6 +146,7 @@ export default function RedbackWeeklySummary() {
         </View>
 
         {loading ? (
+<<<<<<< HEAD
           <ActivityIndicator size="large" color="#3A0A50" style={styles.loader} />
         ) : (
           <>
@@ -254,6 +280,135 @@ export default function RedbackWeeklySummary() {
                 {peakPoint
                   ? `Peak ${selectedChart.toLowerCase()} was ${peakPoint.value} on ${peakPoint.label}`
                   : 'No chart data available'}
+=======
+          <ActivityIndicator size="large" color="#ff4500" style={styles.loader} />
+        ) : (
+          <>
+            <View style={styles.cardGrid}>
+              <View style={styles.summaryCard}>
+                <Text style={styles.cardLabel}>Distance</Text>
+                <Text style={styles.cardValue}>{workoutSummary.totalDistance}</Text>
+              </View>
+
+              <View style={styles.summaryCard}>
+                <Text style={styles.cardLabel}>Calories</Text>
+                <Text style={styles.cardValue}>{workoutSummary.calories}</Text>
+              </View>
+
+              <View style={styles.summaryCard}>
+                <Text style={styles.cardLabel}>Avg Heart Rate</Text>
+                <Text style={styles.cardValue}>{workoutSummary.avgHeartRate}</Text>
+              </View>
+
+              <View style={styles.summaryCard}>
+                <Text style={styles.cardLabel}>Longest Ride</Text>
+                <Text style={styles.cardValue}>{workoutSummary.longestRide}</Text>
+              </View>
+            </View>
+
+            <View style={styles.chartCard}>
+              <View style={styles.chartHeader}>
+                <Text style={styles.chartTitle}>Ride Trends</Text>
+
+                <View style={styles.chartTabs}>
+                  {['Minutes', 'Calories'].map((tab) => {
+                    const isActive = selectedChart === tab;
+                    return (
+                      <TouchableOpacity
+                        key={tab}
+                        onPress={() => setSelectedChart(tab)}
+                        style={[
+                          styles.chartTab,
+                          isActive && { backgroundColor: tabActiveColor },
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.chartTabText,
+                            isActive && { color: tabActiveTextColor },
+                          ]}
+                        >
+                          {tab}
+                        </Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </View>
+              </View>
+
+              <View style={styles.chartInner}>
+                <LineChart
+                  data={currentLineData}
+                  curved
+                  thickness={3}
+                  color={chartColor}
+                  hideDataPoints={false}
+                  dataPointsColor={chartColor}
+                  dataPointsRadius={4}
+                  yAxisColor="rgba(255,255,255,0.12)"
+                  xAxisColor="rgba(255,255,255,0.12)"
+                  rulesColor="rgba(255,255,255,0.08)"
+                  yAxisTextStyle={{ color: '#888' }}
+                  xAxisLabelTextStyle={{ color: '#aaa' }}
+                  backgroundColor="#1a1a1a"
+                  noOfSections={4}
+                  maxValue={selectedChart === 'Minutes' ? 120 : 600}
+                  width={chartWidth}
+                  spacing={spacing}
+                  initialSpacing={12}
+                  endSpacing={12}
+                  isAnimated
+                  animateOnDataChange
+                  hideOrigin
+                  pointerConfig={{
+                    pointerStripHeight: 160,
+                    pointerStripColor: chartColor,
+                    pointerStripWidth: 1,
+                    pointerColor: chartColor,
+                    radius: 6,
+                    pointerLabelWidth: 90,
+                    pointerLabelHeight: 50,
+                    activatePointersOnLongPress: true,
+                    autoAdjustPointerLabelPosition: true,
+                    pointerLabelComponent: (items) => {
+                      const item = items[0];
+                      return (
+                        <View style={styles.pointerBox}>
+                          <Text style={styles.pointerTitle}>{item.label}</Text>
+                          <Text style={styles.pointerValue}>
+                            {item.value} {selectedChart === 'Minutes' ? 'min' : 'cal'}
+                          </Text>
+                        </View>
+                      );
+                    },
+                  }}
+                />
+              </View>
+
+              <Text style={[styles.chartInsight, { color: chartColor }]}>
+                {peakPoint
+                  ? `Peak ${selectedChart.toLowerCase()} was ${peakPoint.value} on ${peakPoint.label}`
+                  : 'No chart data available'}
+              </Text>
+            </View>
+
+            <View style={styles.stats}>
+              <Text style={styles.statText}>
+                🕒 Total Ride Time:{' '}
+                <Text style={styles.statHighlight}>{formattedTotalTime}</Text>
+              </Text>
+              <Text style={styles.statText}>
+                📅 Active Days:{' '}
+                <Text style={styles.statHighlight}>{activeDays} days</Text>
+              </Text>
+            </View>
+
+            <View style={styles.motivationBox}>
+              <Text style={styles.motivation}>
+                {bestDay
+                  ? `🔥 Your strongest day was ${bestDay.day} with ${bestDay.minutes} minutes!`
+                  : '💪 Keep pushing to hit your weekly targets!'}
+>>>>>>> upstream/main
               </Text>
             </LinearGradient>
 
@@ -302,6 +457,21 @@ export default function RedbackWeeklySummary() {
                 </View>
               ))}
             </View>
+
+            <View style={styles.recentBox}>
+              <Text style={styles.recentTitle}>Recent Workouts</Text>
+
+              {recentWorkouts.map((workout) => (
+                <View key={workout.id} style={styles.workoutRow}>
+                  <View>
+                    <Text style={styles.workoutName}>{workout.title}</Text>
+                    <Text style={styles.workoutDuration}>{workout.duration}</Text>
+                  </View>
+
+                  <Text style={styles.workoutCalories}>{workout.calories}</Text>
+                </View>
+              ))}
+            </View>
           </>
         )}
       </ScrollView>
@@ -331,6 +501,9 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 28,
   },
+  loader: {
+    marginTop: 40,
+  },
   title: {
     fontSize: 39,
     fontWeight: '900',
@@ -343,9 +516,81 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginTop: 6,
   },
+<<<<<<< HEAD
   headerIcon: {
     fontSize: 30,
     marginTop: 6,
+=======
+  cardGrid: {
+    width: '100%',
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  summaryCard: {
+    width: '48%',
+    backgroundColor: '#1e1e1e',
+    padding: 16,
+    borderRadius: 14,
+    marginBottom: 12,
+  },
+  cardLabel: {
+    color: '#aaa',
+    fontSize: 13,
+  },
+  cardValue: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 8,
+  },
+  chartCard: {
+    width: '100%',
+    backgroundColor: '#1e1e1e',
+    borderRadius: 20,
+    padding: 16,
+    marginTop: 8,
+    marginBottom: 20,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 18,
+  },
+  chartTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  chartTabs: {
+    flexDirection: 'row',
+  },
+  chartTab: {
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 16,
+    backgroundColor: '#2c2c2c',
+    marginLeft: 8,
+  },
+  chartTabText: {
+    color: '#aaa',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  chartInner: {
+    marginTop: 4,
+    width: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chartInsight: {
+    fontSize: 14,
+    fontWeight: '600',
+    textAlign: 'center',
+    marginTop: 14,
+>>>>>>> upstream/main
   },
   cardGrid: {
     width: '100%',
@@ -462,6 +707,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   recentBox: {
+<<<<<<< HEAD
     backgroundColor: '#f3f0f7',
     padding: 16,
     borderRadius: 18,
@@ -471,12 +717,25 @@ const styles = StyleSheet.create({
     color: '#3A0A50',
     fontSize: 22,
     fontWeight: '900',
+=======
+    marginTop: 24,
+    backgroundColor: '#1e1e1e',
+    padding: 16,
+    borderRadius: 14,
+    width: '100%',
+  },
+  recentTitle: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: '700',
+>>>>>>> upstream/main
     marginBottom: 12,
   },
   workoutRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+<<<<<<< HEAD
     paddingVertical: 13,
     borderBottomWidth: 1,
     borderBottomColor: '#ded7e8',
@@ -515,3 +774,43 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
 });
+=======
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#333',
+  },
+  workoutName: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  workoutDuration: {
+    color: '#aaa',
+    fontSize: 13,
+    marginTop: 2,
+  },
+  workoutCalories: {
+    color: '#ff7f50',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  pointerBox: {
+    backgroundColor: '#111',
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderWidth: 1,
+    borderColor: '#333',
+  },
+  pointerTitle: {
+    color: '#aaa',
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  pointerValue: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+});
+>>>>>>> upstream/main

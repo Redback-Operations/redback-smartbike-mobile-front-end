@@ -1,40 +1,49 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation, router } from "expo-router";
+import { router } from "expo-router";
 import { AuthContext } from "@/context/authContext";
 
 const Setting = ({ settingTitle, icon, link, isLogOut }) => {
-  const { setUser, user } = useContext(AuthContext);
-  const navigation = useNavigation();
+  const { signOut, setUser, setSession } = useContext(AuthContext);
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (isLogOut) {
-      console.log("logged out");
-      if (user) {
-        setUser({});
+      try {
+        if (signOut) {
+          await signOut();
+        } else {
+          if (setUser) setUser(null);
+          if (setSession) setSession(null);
+        }
+
+        router.replace("/");
+      } catch (error) {
+        console.error("Logout failed:", error);
+        alert("Something went wrong while logging out.");
       }
-      //logging out so reset navigation
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "index" }],
-      });
+      return;
     }
-    else router.push(link);
+
+    router.push(link);
   };
+
   return (
     <TouchableOpacity
       onPress={handlePress}
-      className="flex-row gap-4 items-baseline  my-2"
+      className="flex-row items-center py-4 px-1"
     >
-      <View>{icon}</View>
-      <Text className="font-semibold">{settingTitle}</Text>
+      <View className="w-8 items-center">{icon}</View>
+
+      <Text className="ml-2 text-base font-medium text-white">
+        {settingTitle}
+      </Text>
 
       <MaterialIcons
         className="ml-auto"
         name="navigate-next"
-        size={24}
-        color="black"
+        size={22}
+        color="#9ca3af"
       />
     </TouchableOpacity>
   );

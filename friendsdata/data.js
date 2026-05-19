@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 export const initialFriends = [
   {
     id: 1,
@@ -172,3 +173,6 @@ export const getLeaderboardData = (
       rank: index + 1,
     }));
 };
+=======
+export { friends as initialFriends } from "@/features/friends/data";
+>>>>>>> upstream/main
