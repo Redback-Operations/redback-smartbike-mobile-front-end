@@ -7,10 +7,10 @@ import React, {
   useState,
 } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { createClient } from "@supabase/supabase-js";
+import { createClient, Session, User } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY;
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL!;
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
@@ -21,9 +21,28 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
 });
 
-export const AuthContext = createContext();
+type FormattedUser = {
+  id: string;
+  username: string;
+  email: string;
+  rawUser: User;
+} | null;
 
-const formatUser = (supabaseUser) => {
+type AuthContextType = {
+  session: Session | null;
+  user: FormattedUser;
+  loading: boolean;
+  supabase: typeof supabase;
+  signIn: (email: string, password: string) => Promise<any>;
+  signUp: (email: string, password: string, username?: string) => Promise<any>;
+  signOut: () => Promise<any>;
+  resetPassword: (email: string) => Promise<any>;
+  setUser: React.Dispatch<React.SetStateAction<FormattedUser>>;
+};
+
+export const AuthContext = createContext<AuthContextType | null>(null);
+
+const formatUser = (supabaseUser: User | null | undefined): FormattedUser => {
   if (!supabaseUser) return null;
 
   return {
@@ -37,9 +56,9 @@ const formatUser = (supabaseUser) => {
   };
 };
 
-export const AuthProvider = ({ children }) => {
-  const [session, setSession] = useState(null);
-  const [user, setUser] = useState(null);
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<FormattedUser>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -83,7 +102,7 @@ export const AuthProvider = ({ children }) => {
       loading,
       supabase,
 
-      signIn: async (email, password) => {
+      signIn: async (email: string, password: string) => {
         const response = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -97,7 +116,7 @@ export const AuthProvider = ({ children }) => {
         return response;
       },
 
-      signUp: async (email, password, username = "") => {
+      signUp: async (email: string, password: string, username = "") => {
         const response = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -127,13 +146,13 @@ export const AuthProvider = ({ children }) => {
         return response;
       },
 
-      resetPassword: async (email) => {
+      resetPassword: async (email: string) => {
         return await supabase.auth.resetPasswordForEmail(email.trim());
       },
 
       setUser,
     }),
-    [session, user, loading]
+    [session, user, loading],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

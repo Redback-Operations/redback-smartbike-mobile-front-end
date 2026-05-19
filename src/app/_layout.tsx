@@ -22,7 +22,7 @@ const AppNavigator = () => {
     }
 
     if (user && isAuthScreen) {
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/home");
     }
   }, [user, loading, pathname]);
 

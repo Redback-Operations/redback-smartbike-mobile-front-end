@@ -3,8 +3,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  TouchableWithoutFeedback,
-  Keyboard,
   ActivityIndicator,
 } from "react-native";
 import React, { useContext, useEffect, useState } from "react";
@@ -119,8 +117,7 @@ const Contact = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <CustomSafeArea>
+    <CustomSafeArea>
         <View className="flex justify-center h-full px-4">
           <Text className="text-brand-purple text-3xl my-8 font-bold text-center">
             How can we help?
@@ -179,8 +176,7 @@ const Contact = () => {
             </View>
           </View>
         </View>
-      </CustomSafeArea>
-    </TouchableWithoutFeedback>
+    </CustomSafeArea>
   );
 };
 

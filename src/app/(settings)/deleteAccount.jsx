@@ -2,8 +2,6 @@ import {
   View,
   Text,
   TextInput,
-  TouchableWithoutFeedback,
-  Keyboard,
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
@@ -119,8 +117,7 @@ const DeleteAccount = () => {
   }
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <CustomSafeArea>
+    <CustomSafeArea>
         <View className="self-center mb-4 relative">
           <Avatar
             size={100}
@@ -186,8 +183,7 @@ const DeleteAccount = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </CustomSafeArea>
-    </TouchableWithoutFeedback>
+    </CustomSafeArea>
   );
 };
 

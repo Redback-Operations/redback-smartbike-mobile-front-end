@@ -4,8 +4,8 @@ import {
   SafeAreaView,
   Image,
   StatusBar,
-  TouchableWithoutFeedback,
-  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   TouchableOpacity,
 } from "react-native";
 import React, { useState } from "react";
@@ -36,7 +36,7 @@ const index = () => {
         return;
       }
 
-      router.replace("/(tabs)");
+      router.replace("/(tabs)/home");
     } catch (err) {
       alert("Something went wrong while signing in");
       console.log(err);
@@ -44,9 +44,12 @@ const index = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
-        <StatusBar barStyle={"light-content"} />
+    <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
+      <StatusBar barStyle={"light-content"} />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <SafeAreaView>
           <View className="bg-white max-h-[78%] py-6 m-6 rounded-[48px] flex justify-center px-4">
             <Image
@@ -101,8 +104,8 @@ const index = () => {
             </Text>
           </View>
         </SafeAreaView>
-      </LinearGradient>
-    </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 

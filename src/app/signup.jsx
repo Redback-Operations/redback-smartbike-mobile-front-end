@@ -4,8 +4,8 @@ import {
   SafeAreaView,
   Image,
   StatusBar,
-  TouchableWithoutFeedback,
-  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
   TouchableOpacity,
   Alert,
 } from "react-native";
@@ -60,7 +60,7 @@ const SignUp = () => {
 
       if (createdSession) {
         Alert.alert("Success", "Account created successfully");
-        router.replace("/(tabs)");
+        router.replace("/(tabs)/home");
       } else {
         Alert.alert(
           "Check your email",
@@ -78,9 +78,12 @@ const SignUp = () => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
-      <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
-        <StatusBar barStyle={"light-content"} />
+    <LinearGradient style={{ flex: 1 }} colors={["#340C4C", "#EB7363"]}>
+      <StatusBar barStyle={"light-content"} />
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
         <SafeAreaView>
           <View className="bg-white max-h-[78%] py-6 m-6 rounded-[48px] flex justify-center px-4">
             <Image
@@ -146,8 +149,8 @@ const SignUp = () => {
             </Text>
           </View>
         </SafeAreaView>
-      </LinearGradient>
-    </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
