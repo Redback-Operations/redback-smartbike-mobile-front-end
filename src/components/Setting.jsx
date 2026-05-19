@@ -1,26 +1,31 @@
 import { View, Text, TouchableOpacity } from "react-native";
 import React, { useContext } from "react";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import { useNavigation, router } from "expo-router";
+import { router } from "expo-router";
 import { AuthContext } from "@/context/authContext";
 
 const Setting = ({ settingTitle, icon, link, isLogOut }) => {
-  const { setUser, user } = useContext(AuthContext);
-  const navigation = useNavigation();
+  const { signOut, setUser, setSession } = useContext(AuthContext);
 
-  const handlePress = () => {
+  const handlePress = async () => {
     if (isLogOut) {
-      if (user) {
-        setUser({});
-      }
+      try {
+        if (signOut) {
+          await signOut();
+        } else {
+          if (setUser) setUser(null);
+          if (setSession) setSession(null);
+        }
 
-      navigation.reset({
-        index: 0,
-        routes: [{ name: "index" }],
-      });
-    } else {
-      router.push(link);
+        router.replace("/");
+      } catch (error) {
+        console.error("Logout failed:", error);
+        alert("Something went wrong while logging out.");
+      }
+      return;
     }
+
+    router.push(link);
   };
 
   return (
