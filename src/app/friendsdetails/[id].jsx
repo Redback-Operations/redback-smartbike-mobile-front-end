@@ -1,5 +1,5 @@
-import { useLocalSearchParams } from "expo-router";
-import { View, Text, Image, StyleSheet, Linking, Button } from "react-native";
+import { useLocalSearchParams, router } from "expo-router";
+import { View, Text, Image, Linking, TouchableOpacity } from "react-native";
 import { initialFriends } from "../../../friendsdata/data";
 import CustomSafeArea from "@/components/CustomSafeArea";
 
@@ -12,6 +12,21 @@ export default function FriendDetails() {
     Linking.openURL("https://www.strava.com/"); // or a user-specific Strava link if available
   };
 
+  if (!data) {
+    return (
+      <CustomSafeArea>
+        <View className="flex-1 items-center justify-center px-6">
+          <Text className="text-xl text-center font-semibold">
+            Friend not found
+          </Text>
+          <Text className="text-center text-gray-500 mt-2">
+            This friend profile could not be loaded.
+          </Text>
+        </View>
+      </CustomSafeArea>
+    );
+  }
+
   return (
     <CustomSafeArea>
       <View>
@@ -21,7 +36,6 @@ export default function FriendDetails() {
         />
         <View className="gap-2">
           <Text className="text-xl text-center font-semibold">
-            {" "}
             {data.name}
           </Text>
           <Text className="text-center text-gray-500">{data.dob}</Text>
@@ -32,6 +46,15 @@ export default function FriendDetails() {
           >
             www.strava.com
           </Text>
+
+          <TouchableOpacity
+            onPress={() => router.push(`/chat/${data.id}`)}
+            className="bg-brand-purple mx-12 mt-4 rounded-2xl py-3"
+          >
+            <Text className="text-white text-center font-semibold text-base">
+              Message
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
     </CustomSafeArea>

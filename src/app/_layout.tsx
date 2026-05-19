@@ -17,6 +17,9 @@ const _layout = () => {
           <Stack.Screen name="signup" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />
 
+          <Stack.Screen name="chat/index" options={{ headerShown: false }} />
+          <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
+
           <Stack.Screen
             name="(scheduleWorkout)"
             options={{
@@ -76,6 +79,13 @@ const _layout = () => {
               headerShown: true,
               headerTitle: "",
               headerTintColor: "white",
+            }}
+          />
+
+          <Stack.Screen
+            name="leaderboard"
+            options={{
+              headerShown: false,
             }}
           />
         </Stack>

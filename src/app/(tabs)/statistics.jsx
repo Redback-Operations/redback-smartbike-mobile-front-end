@@ -231,7 +231,11 @@ export default function RedbackWeeklySummary() {
                     activatePointersOnLongPress: true,
                     autoAdjustPointerLabelPosition: true,
                     pointerLabelComponent: (items) => {
-                      const item = items[0];
+                      const item = items?.[0];
+
+                      if (!item) {
+                        return null;
+                      }
 
                       return (
                         <View style={styles.pointerBox}>
