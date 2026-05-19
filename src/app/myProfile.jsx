@@ -8,6 +8,7 @@ import {
   Linking,
   TextInput,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { router, Stack } from "expo-router";
 import AntDesign from "@expo/vector-icons/AntDesign";
@@ -15,7 +16,7 @@ import CustomSafeArea from "@/components/CustomSafeArea";
 import { AuthContext } from "@/context/authContext";
 
 export default function UserDetails() {
-  const { user, setUser } = useContext(AuthContext);
+  const { user, setUser, loading } = useContext(AuthContext);
 
   const [isEditing, setIsEditing] = useState(false);
   const [username, setUsername] = useState(user?.username || "");
@@ -79,6 +80,26 @@ export default function UserDetails() {
     setIsEditing(false);
     Alert.alert("Saved", "Profile details updated successfully.");
   };
+
+  if (loading) {
+    return (
+      <CustomSafeArea>
+        <View style={styles.centered}>
+          <ActivityIndicator size="large" color="#3A1C72" />
+        </View>
+      </CustomSafeArea>
+    );
+  }
+
+  if (!user) {
+    return (
+      <CustomSafeArea>
+        <View style={styles.centered}>
+          <Text>No user found</Text>
+        </View>
+      </CustomSafeArea>
+    );
+  }
 
   return (
     <>
@@ -198,6 +219,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#050505",
     alignItems: "center",
     padding: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   backButton: {
     position: "absolute",

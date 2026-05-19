@@ -20,9 +20,10 @@ const TextInputWithLogo = ({
 
       <TextInput
         autoCapitalize="none"
+        value={data?.[id] ?? ""}
         onChangeText={(text) => setData({ ...data, [id]: text })}
         secureTextEntry={secure}
-        className="w-full rounded-full"
+        className="flex-1"
         placeholder={placeholder}
         onFocus={() => {
           setFocus(true);

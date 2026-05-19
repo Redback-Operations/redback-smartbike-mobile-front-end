@@ -1,4 +1,4 @@
-import { View, FlatList } from "react-native";
+import { View, Text, FlatList, ActivityIndicator } from "react-native";
 import React, { useContext } from "react";
 
 import Avatar from "@/components/Avatar";
@@ -50,21 +50,29 @@ const homeTiles = [
 ];
 
 const Home = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <CustomSafeArea applyTopInset={false} bgColour="black">
+        <View className="flex-1 justify-center items-center">
+          <ActivityIndicator size="large" color="#EB7363" />
+        </View>
+      </CustomSafeArea>
+    );
+  }
 
   return (
     <CustomSafeArea applyTopInset={false} bgColour="black">
       <View className="px-4 flex-1">
-        {/* Header */}
         <View className="flex-row justify-between items-center my-4">
-          <WelcomeMessage name={user?.username ? user.username : "Username"} />
+          <WelcomeMessage name={user?.username || "Username"} />
           <Avatar size={50} />
         </View>
 
-        
         <LastWeekActivity />
 
-        
+
         <View className="my-4">
           <TodayRideSummaryCard
             distanceKm={3.2}

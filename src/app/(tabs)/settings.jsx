@@ -1,4 +1,4 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, ActivityIndicator } from "react-native";
 import React, { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -13,9 +13,19 @@ const settingsItems = [
     icon: <AntDesign name="user" size={18} color="#ff7a6b" />,
   },
   {
+    title: "Edit Profile",
+    link: "/editProfile",
+    icon: <AntDesign name="user" size={18} color="#ff7a6b" />,
+  },
+  {
     title: "Contact Us",
     link: "/contact",
     icon: <AntDesign name="mail" size={18} color="#ff7a6b" />,
+  },
+  {
+    title: "My Workout History",
+    link: "/workoutHistory",
+    icon: <AntDesign name="barchart" size={18} color="#ff7a6b" />,
   },
   {
     title: "About Us",
@@ -41,7 +51,15 @@ const settingsItems = [
 ];
 
 const Settings = () => {
-  const { user } = useContext(AuthContext);
+  const { user, loading } = useContext(AuthContext);
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-black">
+        <ActivityIndicator size="large" color="#ff7a6b" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-black">
