@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -7,12 +7,15 @@ import {
   TouchableOpacity,
   FlatList,
   StyleSheet,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import { chatContacts } from "../../../friendsdata/chatData";
+import { useAuth } from "@/context/authContext";
+import { fetchConversations } from "@/features/chat/data";
 
 const chatGradients = [
   ["#F4D2D2", "#FF4D4D"],
@@ -25,18 +28,53 @@ const chatGradients = [
 
 export default function ChatListScreen() {
   const router = useRouter();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [contacts, setContacts] = useState([]);
+  const [usingMockFallback, setUsingMockFallback] = useState(false);
+  const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    setIsLoadingConversations(true);
+
+    fetchConversations(user?.id)
+      .then((rows) => {
+        if (isMounted) {
+          setContacts(rows);
+          setUsingMockFallback(false);
+        }
+      })
+      .catch((error) => {
+        console.warn("Chat list falling back to mock data.", error);
+
+        if (isMounted) {
+          setContacts(chatContacts);
+          setUsingMockFallback(true);
+        }
+      })
+      .finally(() => {
+        if (isMounted) {
+          setIsLoadingConversations(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user?.id]);
 
   const filteredContacts = useMemo(() => {
     const query = search.toLowerCase().trim();
-    if (!query) return chatContacts;
+    if (!query) return contacts;
 
-    return chatContacts.filter(
+    return contacts.filter(
       (item) =>
         item.name.toLowerCase().includes(query) ||
         item.lastMessage.toLowerCase().includes(query)
     );
-  }, [search]);
+  }, [contacts, search]);
 
   return (
     <CustomSafeArea bgColour="#F3F3F3">
@@ -66,6 +104,19 @@ export default function ChatListScreen() {
           columnWrapperStyle={styles.columnWrapper}
           showsVerticalScrollIndicator={false}
           contentContainerStyle={styles.listContent}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              {isLoadingConversations ? (
+                <ActivityIndicator size="small" color="#340C4C" />
+              ) : (
+                <Text style={styles.emptyText}>
+                  {usingMockFallback
+                    ? "No mock chats found"
+                    : "No conversations yet. Open a friend profile and tap Message."}
+                </Text>
+              )}
+            </View>
+          }
           renderItem={({ item, index }) => {
             const colors = chatGradients[index % chatGradients.length];
 
@@ -73,7 +124,19 @@ export default function ChatListScreen() {
               <TouchableOpacity
                 style={styles.cardWrap}
                 activeOpacity={0.9}
-                onPress={() => router.push(`/chat/${item.id}`)}
+                onPress={() =>
+                  router.push({
+                    pathname: "/chat/[id]",
+                    params: {
+                      id: item.conversationId || item.id,
+                      mode: item.isBackendConversation ? "conversation" : "mock",
+                      name: item.name,
+                      photo: item.photo,
+                      status: item.status,
+                      profileId: item.profileId || "",
+                    },
+                  })
+                }
               >
                 <LinearGradient
                   colors={colors}
@@ -212,5 +275,17 @@ const styles = StyleSheet.create({
     lineHeight: 17,
     color: "rgba(255,255,255,0.92)",
     paddingRight: 6,
+  },
+  emptyState: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 18,
+    padding: 18,
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "#340C4C",
+    fontSize: 15,
+    fontWeight: "700",
+    textAlign: "center",
   },
 });

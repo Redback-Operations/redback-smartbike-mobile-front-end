@@ -1,18 +1,10 @@
-<<<<<<< HEAD
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
-=======
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from "react-native";
->>>>>>> upstream/main
 import React, { useContext } from "react";
 import { router } from "expo-router";
 import Avatar from "@/components/Avatar";
 import LastWeekActivity from "@/components/LastWeekActivity";
 import WelcomeMessage from "@/components/WelcomeMessage";
-<<<<<<< HEAD
-=======
 import CustomSafeArea from "@/components/CustomSafeArea";
-import TodayRideSummaryCard from "@/components/TodayRideSummaryCard";
->>>>>>> upstream/main
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { AuthContext } from "@/context/authContext";
@@ -26,7 +18,6 @@ const quickStats = [
 ];
 
 const secondaryTiles = [
-<<<<<<< HEAD
   {
     title: "Leaderboard",
     subtitle: "See who leads this week",
@@ -34,8 +25,6 @@ const secondaryTiles = [
     wide: true,
     icon: <MaterialIcons name="leaderboard" size={32} color="#EB7363" />,
   },
-=======
->>>>>>> upstream/main
   {
     title: "Groups",
     subtitle: "Join ride groups",
@@ -62,7 +51,6 @@ const secondaryTiles = [
   },
 ];
 
-<<<<<<< HEAD
 const StatCard = ({ item }) => {
   return (
     <View className="flex-1 bg-[#15171C] rounded-2xl px-4 py-4">
@@ -114,60 +102,6 @@ const SmallTile = ({ item }) => {
 const Home = () => {
   const { user } = useContext(AuthContext);
   const username = user?.username ? user.username : "Username";
-=======
-const StatCard = ({ item }) => (
-  <View className="flex-1 bg-[#15171C] rounded-2xl px-4 py-4">
-    <Text className="text-gray-400 text-xs">{item.title}</Text>
-    <Text className="text-white text-xl font-bold mt-1">{item.value}</Text>
-  </View>
-);
-
-const FeaturedCard = ({ title, subtitle, link, icon }) => (
-  <TouchableOpacity
-    activeOpacity={0.85}
-    onPress={() => router.push(link)}
-    className="flex-1 bg-[#15171C] rounded-2xl p-4 min-h-[180px] justify-between"
-  >
-    <View className="flex-row justify-between items-start">
-      <View className="flex-1 pr-3">
-        <Text className="text-white text-lg font-semibold">{title}</Text>
-        <Text className="text-gray-400 text-sm mt-1">{subtitle}</Text>
-      </View>
-      {icon}
-    </View>
-    <View className="items-end">
-      <MaterialIcons name="keyboard-arrow-right" size={24} color="#EB7363" />
-    </View>
-  </TouchableOpacity>
-);
-
-const SmallTile = ({ item }) => (
-  <TouchableOpacity
-    activeOpacity={0.85}
-    onPress={() => router.push(item.link)}
-    className="w-[48.5%] bg-[#15171C] rounded-2xl p-4 min-h-[140px] justify-between"
-  >
-    <View>{item.icon}</View>
-    <View>
-      <Text className="text-white font-semibold text-base">{item.title}</Text>
-      <Text className="text-gray-400 text-xs mt-1">{item.subtitle}</Text>
-    </View>
-  </TouchableOpacity>
-);
-
-const Home = () => {
-  const { user, loading } = useContext(AuthContext);
-
-  if (loading) {
-    return (
-      <CustomSafeArea applyTopInset={false} bgColour="black">
-        <View className="flex-1 justify-center items-center">
-          <ActivityIndicator size="large" color="#EB7363" />
-        </View>
-      </CustomSafeArea>
-    );
-  }
->>>>>>> upstream/main
 
   return (
     <CustomSafeArea applyTopInset={false} bgColour="black">
@@ -178,15 +112,10 @@ const Home = () => {
       >
         <View className="flex-row justify-between items-center my-4">
           <View>
-<<<<<<< HEAD
             <WelcomeMessage name={username} />
             <Text className="text-gray-400 mt-1">
               Ready for your next ride?
             </Text>
-=======
-            <WelcomeMessage name={user?.username || "Username"} />
-            <Text className="text-gray-400 mt-1">Ready for your next ride?</Text>
->>>>>>> upstream/main
           </View>
           <Avatar size={50} />
         </View>
@@ -204,20 +133,6 @@ const Home = () => {
           <LastWeekActivity />
         </View>
 
-<<<<<<< HEAD
-=======
-        <View className="mb-5">
-          <TodayRideSummaryCard
-            distanceKm={3.2}
-            durationMin={17}
-            avgSpeedKmh={11.3}
-            caloriesKcal={220}
-            terrain="Forest Trail"
-            goalKm={5.0}
-          />
-        </View>
-
->>>>>>> upstream/main
         <View className="mb-3">
           <Text className="text-white text-lg font-semibold">Main Actions</Text>
           <Text className="text-gray-400 text-sm mt-1">
@@ -236,13 +151,9 @@ const Home = () => {
             title="Start workout"
             subtitle="Begin a new cycling session"
             link="/startworkout"
-<<<<<<< HEAD
             icon={
               <MaterialCommunityIcons name="bike" size={36} color="#EB7363" />
             }
-=======
-            icon={<MaterialCommunityIcons name="bike" size={36} color="#EB7363" />}
->>>>>>> upstream/main
           />
         </View>
 

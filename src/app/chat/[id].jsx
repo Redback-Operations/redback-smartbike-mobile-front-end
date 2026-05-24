@@ -1,28 +1,167 @@
-import React, { useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  TextInput,
+  Alert,
+  ActivityIndicator,
   FlatList,
+  Image,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { Ionicons, Feather } from "@expo/vector-icons";
+import { Feather, Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import CustomSafeArea from "@/components/CustomSafeArea";
-import { getChatContactById } from "../../../friendsdata/chatData";
+import { useAuth } from "@/context/authContext";
+import { getFriendById } from "@/features/friends/data";
+import {
+  createConversation,
+  fetchMessages,
+  getMockContactById,
+  isUuid,
+  sendChatMessage,
+} from "@/features/chat/data";
+
+const fallbackContact = {
+  id: "unknown",
+  name: "Chat",
+  photo: "https://i.pravatar.cc/150?img=14",
+  status: "Active",
+  messages: [],
+};
 
 export default function ChatConversationScreen() {
-  const { id } = useLocalSearchParams();
+  const { id, mode, name, photo, status } = useLocalSearchParams();
   const router = useRouter();
-  const contact = useMemo(() => getChatContactById(id), [id]);
+  const { user } = useAuth();
+  const routeId = Array.isArray(id) ? String(id[0] || "") : String(id || "");
+  const routeMode = Array.isArray(mode) ? mode[0] : mode;
+  const routeName = Array.isArray(name) ? name[0] : name;
+  const routePhoto = Array.isArray(photo) ? photo[0] : photo;
+  const routeStatus = Array.isArray(status) ? status[0] : status;
+  const routeContact = useMemo(() => {
+    if (!routeName && !routePhoto && !routeStatus) return null;
+
+    return {
+      id: routeId,
+      name: routeName || "Rider",
+      photo: routePhoto || fallbackContact.photo,
+      status: routeStatus || "Active",
+      messages: [],
+    };
+  }, [routeId, routeName, routePhoto, routeStatus]);
+  const mockContact = useMemo(() => getMockContactById(routeId), [routeId]);
+  const friendContact = useMemo(() => getFriendById(routeId), [routeId]);
+  const initialContact =
+    routeContact || mockContact || friendContact || fallbackContact;
+  const [contact, setContact] = useState(initialContact);
+  const [conversationId, setConversationId] = useState(
+    routeMode === "conversation" || (isUuid(routeId) && routeMode !== "profile")
+      ? routeId
+      : null,
+  );
   const [input, setInput] = useState("");
-  const [messages, setMessages] = useState(contact?.messages || []);
+  const [messages, setMessages] = useState(initialContact?.messages || []);
+  const [usingMockFallback, setUsingMockFallback] = useState(false);
+  const [isLoadingMessages, setIsLoadingMessages] = useState(false);
   const listRef = useRef(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadConversation = async () => {
+      if (isMounted) {
+        setContact(initialContact);
+        setMessages(initialContact?.messages || []);
+      }
+
+      if (!user?.id) return;
+
+      setIsLoadingMessages(true);
+
+      if (routeMode !== "profile" && isUuid(routeId)) {
+        const apiMessages = await fetchMessages(routeId, user.id);
+
+        if (isMounted) {
+          setConversationId(routeId);
+          setMessages(apiMessages);
+          setUsingMockFallback(false);
+        }
+
+        return;
+      }
+
+      if (routeMode === "profile" && isUuid(routeId)) {
+        const response = await createConversation([user.id, routeId]);
+        const apiMessages = await fetchMessages(response.id, user.id);
+
+        if (isMounted) {
+          setConversationId(response.id);
+          setContact({
+            ...initialContact,
+            id: routeId,
+          });
+          setMessages(apiMessages);
+          setUsingMockFallback(false);
+        }
+      }
+    };
+
+    loadConversation().catch((error) => {
+      console.warn("Chat conversation unavailable. Using mock/local data.", error);
+
+      if (isMounted) {
+        setUsingMockFallback(true);
+        setMessages(initialContact?.messages || []);
+      }
+    }).finally(() => {
+      if (isMounted) {
+        setIsLoadingMessages(false);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [initialContact, routeId, routeMode, user?.id]);
+
+  const handleSend = async () => {
+    const trimmed = input.trim();
+    if (!trimmed) return;
+
+    if (!conversationId || !user?.id || usingMockFallback) {
+      const newMessage = {
+        id: `${contact.id}-${Date.now()}`,
+        sender: "me",
+        text: trimmed,
+        time: "Now",
+      };
+
+      setMessages((prev) => [...prev, newMessage]);
+      setInput("");
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
+      return;
+    }
+
+    try {
+      const payload = {
+        conversationId,
+        senderId: user?.id,
+        body: trimmed,
+      };
+      const sentMessage = await sendChatMessage(payload);
+      setMessages((prev) => [...prev, sentMessage]);
+      setInput("");
+      setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
+    } catch (error) {
+      console.warn("Send message failed.", error);
+      Alert.alert("Message failed", error?.message || "Please try again.");
+    }
+  };
 
   if (!contact) {
     return (
@@ -33,22 +172,6 @@ export default function ChatConversationScreen() {
       </CustomSafeArea>
     );
   }
-
-  const handleSend = () => {
-    const trimmed = input.trim();
-    if (!trimmed) return;
-
-    const newMessage = {
-      id: `${contact.id}-${Date.now()}`,
-      sender: "me",
-      text: trimmed,
-      time: "Now",
-    };
-
-    setMessages((prev) => [...prev, newMessage]);
-    setInput("");
-    setTimeout(() => listRef.current?.scrollToEnd({ animated: true }), 50);
-  };
 
   return (
     <CustomSafeArea bgColour="#F3F3F3">
@@ -81,7 +204,7 @@ export default function ChatConversationScreen() {
 
           <View style={{ flex: 1 }}>
             <Text style={styles.contactName}>{contact.name}</Text>
-            <Text style={styles.contactStatus}>{contact.status}</Text>
+            <Text style={styles.contactStatus}>{contact.status || "Active"}</Text>
           </View>
 
           <TouchableOpacity style={styles.actionBtn}>
@@ -100,11 +223,22 @@ export default function ChatConversationScreen() {
             keyExtractor={(item) => item.id}
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.messageListContent}
+            ListEmptyComponent={
+              <View style={styles.emptyState}>
+                {isLoadingMessages ? (
+                  <ActivityIndicator size="small" color="#6A5AE0" />
+                ) : (
+                  <Text style={styles.emptyText}>
+                    No messages yet. Send the first one.
+                  </Text>
+                )}
+              </View>
+            }
             onContentSizeChange={() =>
               listRef.current?.scrollToEnd({ animated: false })
             }
             renderItem={({ item }) => {
-              const isMe = item.sender === "me";
+              const isMe = item.sender === "me" || item.sender_id === user?.id;
 
               return (
                 <View
@@ -251,6 +385,18 @@ const styles = StyleSheet.create({
   },
   messageListContent: {
     paddingBottom: 10,
+    flexGrow: 1,
+  },
+  emptyState: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  emptyText: {
+    color: "#6A6A6A",
+    fontWeight: "700",
+    textAlign: "center",
   },
   messageRow: {
     flexDirection: "row",

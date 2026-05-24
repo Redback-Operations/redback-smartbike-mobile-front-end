@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import { Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -7,6 +7,9 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import CustomSafeArea from "@/components/CustomSafeArea";
 import { AuthContext } from "@/context/authContext";
 import { getLeaderboardData } from "../../friendsdata/data";
+
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+const FALLBACK_PHOTO = "https://i.pravatar.cc/150?img=14";
 
 const leaderboardPeriods = [
   {
@@ -391,15 +394,52 @@ const LeaderboardRow = ({ rider, activePeriod }) => {
   );
 };
 
+const toNumber = (value) => {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number : 0;
+};
+
+const normalizeLeaderboardRows = (rows) => {
+  if (!Array.isArray(rows)) return [];
+
+  return rows.map((row, index) => ({
+    id: row?.id ?? `leaderboard-${index}`,
+    name: row?.name || row?.username || "Rider",
+    photo: row?.photo || row?.avatar_url || FALLBACK_PHOTO,
+    email: row?.email || "",
+    status: row?.status || "Rising",
+    badge: row?.badge || "Consistency",
+    distance: toNumber(row?.distance),
+    points: toNumber(row?.points),
+    periodRides: toNumber(row?.periodRides),
+    rank: toNumber(row?.rank) || index + 1,
+  }));
+};
+
 export default function Leaderboard() {
   const { user } = useContext(AuthContext);
   const username = user?.username ? user.username : "Username";
   const [activePeriod, setActivePeriod] = useState("weekly");
+  const [apiLeaderboard, setApiLeaderboard] = useState([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
   const activeConfig =
     leaderboardPeriods.find((period) => period.key === activePeriod) ??
     leaderboardPeriods[1];
-  const leaderboard = getLeaderboardData(activePeriod, username);
-  const currentRider = leaderboard.find((rider) => rider.id === "self");
+  const mockLeaderboard = useMemo(
+    () => getLeaderboardData(activePeriod, username),
+    [activePeriod, username]
+  );
+  const leaderboard =
+    !isLoadingLeaderboard && apiLeaderboard.length > 0
+      ? apiLeaderboard
+      : mockLeaderboard;
+  const currentRider = leaderboard.find(
+    (rider) =>
+      String(rider.id) === String(user?.id) ||
+      rider.id === "self" ||
+      rider.isCurrentUser
+  );
   const topRider = leaderboard[0];
   const currentRank = currentRider ? `#${currentRider.rank}` : "-";
   const currentPoints = currentRider ? currentRider.points.toLocaleString() : "0";
@@ -442,6 +482,53 @@ export default function Leaderboard() {
   const challengeProgressRatio = currentRider
     ? currentRider.distance / activeConfig.challengeGoal
     : 0;
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchLeaderboard = async () => {
+      if (!API_BASE_URL) {
+        console.warn("EXPO_PUBLIC_API_URL is not set. Using mock leaderboard.");
+        setApiLeaderboard([]);
+        return;
+      }
+
+      setIsLoadingLeaderboard(true);
+
+      try {
+        const url = `${API_BASE_URL.replace(/\/$/, "")}/api/leaderboard?timeframe=${encodeURIComponent(activePeriod)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+          throw new Error(`Leaderboard API returned ${response.status}`);
+        }
+
+        const data = await response.json();
+        const rows = normalizeLeaderboardRows(data);
+
+        if (isMounted) {
+          setApiLeaderboard(rows.length > 0 ? rows : []);
+        }
+      } catch (error) {
+        console.warn("Leaderboard API unavailable. Using mock data.", error);
+
+        if (isMounted) {
+          setApiLeaderboard([]);
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoadingLeaderboard(false);
+        }
+      }
+    };
+
+    fetchLeaderboard();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activePeriod]);
+
   const highlightItems = [
     {
       title: `${topRiderName} is setting the pace`,
@@ -478,7 +565,10 @@ export default function Leaderboard() {
           className="mb-4 self-start"
           onPress={() => router.back()}
         >
-          <Text className="text-[#C2C8D0] text-base">← Back</Text>
+          <View className="flex-row items-center">
+            <MaterialIcons name="arrow-back" size={18} color="#C2C8D0" />
+            <Text className="text-[#C2C8D0] text-base ml-1">Back</Text>
+          </View>
         </TouchableOpacity>
 
         <LinearGradient
@@ -505,7 +595,7 @@ export default function Leaderboard() {
 
           <View className="mt-5 self-start px-4 py-2 rounded-full bg-[#1D2432]">
             <Text className="text-[#D8DEE8] text-xs font-medium">
-              {activeConfig.title}
+              {isLoadingLeaderboard ? "Updating standings..." : activeConfig.title}
             </Text>
           </View>
         </LinearGradient>

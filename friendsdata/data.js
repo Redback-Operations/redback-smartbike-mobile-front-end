@@ -1,122 +1,135 @@
-<<<<<<< HEAD
-export const initialFriends = [
-  {
-    id: 1,
-    name: "Jordan Anderson",
-    photo: "https://i.pravatar.cc/150?img=12",
-    email: "jordan@example.com",
-    dob: "1995-04-12",
-    status: "Online",
-    rides: 24,
-    weeklyDistance: 86.4,
-    points: 2480,
-    badge: "Sprint King",
-    leaderboardStats: {
-      daily: {
-        distance: 14.2,
-        points: 480,
-        rides: 1,
-      },
-      weekly: {
-        distance: 86.4,
-        points: 2480,
-        rides: 6,
-      },
-      monthly: {
-        distance: 312.8,
-        points: 8940,
-        rides: 24,
-      },
-    },
-  },
-  {
-    id: 2,
-    name: "Aviksha Vidya",
-    photo: "https://i.pravatar.cc/150?img=5",
-    email: "aviksha@example.com",
-    dob: "1998-09-28",
-    status: "Active",
-    rides: 18,
-    weeklyDistance: 58.1,
-    points: 1985,
-    badge: "Early Bird",
-    leaderboardStats: {
-      daily: {
-        distance: 9.6,
-        points: 365,
-        rides: 1,
-      },
-      weekly: {
-        distance: 58.1,
-        points: 1985,
-        rides: 4,
-      },
-      monthly: {
-        distance: 244.6,
-        points: 7760,
-        rides: 18,
-      },
-    },
-  },
-  {
-    id: 3,
-    name: "Karan Kapoor",
-    photo: "https://i.pravatar.cc/150?img=20",
-    email: "karan@example.com",
-    dob: "1993-07-22",
-    status: "Offline",
-    rides: 31,
-    weeklyDistance: 64.2,
-    points: 2090,
-    badge: "Power Ride",
-    leaderboardStats: {
-      daily: {
-        distance: 11.8,
-        points: 410,
-        rides: 1,
-      },
-      weekly: {
-        distance: 64.2,
-        points: 2090,
-        rides: 5,
-      },
-      monthly: {
-        distance: 358.4,
-        points: 9780,
-        rides: 31,
-      },
-    },
-  },
-  {
-    id: 4,
-    name: "Alicia Chen",
-    photo: "https://i.pravatar.cc/150?img=24",
-    email: "alicia@example.com",
-    dob: "1996-01-17",
-    status: "Online",
-    rides: 27,
-    weeklyDistance: 79.3,
-    points: 2365,
-    badge: "Climber",
-    leaderboardStats: {
-      daily: {
-        distance: 13.5,
-        points: 455,
-        rides: 1,
-      },
-      weekly: {
-        distance: 79.3,
-        points: 2365,
-        rides: 5,
-      },
-      monthly: {
-        distance: 329.7,
-        points: 9215,
-        rides: 27,
-      },
-    },
-  },
-];
+import { friends as friendSource } from "@/features/friends/data";
+
+export const initialFriends = friendSource;
+
+const EMPTY_LEADERBOARD_STATS = {
+  distance: 0,
+  points: 0,
+  rides: 0,
+};
+
+const toNumber = (value, fallback = 0) => {
+  const number = Number(value);
+
+  return Number.isFinite(number) ? number : fallback;
+};
+
+const getPeriodStats = (rider, timeframe = "weekly") => {
+  const stats = rider?.leaderboardStats?.[timeframe];
+
+  return {
+    distance: toNumber(stats?.distance, EMPTY_LEADERBOARD_STATS.distance),
+    points: toNumber(stats?.points, EMPTY_LEADERBOARD_STATS.points),
+    rides: toNumber(stats?.rides, EMPTY_LEADERBOARD_STATS.rides),
+  };
+};
+
+const getPeriodStart = (timeframe = "weekly", now = new Date()) => {
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+
+  if (timeframe === "weekly") {
+    const day = start.getDay();
+    const diff = day === 0 ? 6 : day - 1;
+    start.setDate(start.getDate() - diff);
+  }
+
+  if (timeframe === "monthly") {
+    start.setDate(1);
+  }
+
+  return start;
+};
+
+const getRideUserId = (ride) =>
+  ride?.user_id ?? ride?.profile_id ?? ride?.rider_id ?? ride?.userId;
+
+const getRideDistance = (ride) =>
+  toNumber(ride?.distance_km ?? ride?.distanceKm ?? ride?.distance);
+
+const getRidePoints = (ride) => {
+  const explicitPoints = ride?.points;
+
+  if (explicitPoints !== undefined && explicitPoints !== null) {
+    return toNumber(explicitPoints);
+  }
+
+  return Math.round(getRideDistance(ride) * 10);
+};
+
+const getRideDate = (ride) => {
+  const rawDate = ride?.started_at ?? ride?.created_at ?? ride?.date;
+  const date = rawDate ? new Date(rawDate) : null;
+
+  return date && !Number.isNaN(date.getTime()) ? date : null;
+};
+
+export const buildLeaderboardRows = ({
+  profiles = [],
+  rides = [],
+  timeframe = "weekly",
+  currentUserId,
+} = {}) => {
+  const periodStart = getPeriodStart(timeframe);
+  const periodEnd = new Date();
+
+  const rows = profiles.map((profile) => {
+    const profileId = profile?.id ?? profile?.user_id ?? profile?.userId;
+    const profileRides = rides.filter((ride) => {
+      const rideDate = getRideDate(ride);
+
+      return (
+        String(getRideUserId(ride)) === String(profileId) &&
+        rideDate &&
+        rideDate >= periodStart &&
+        rideDate <= periodEnd
+      );
+    });
+
+    const distance = profileRides.reduce(
+      (total, ride) => total + getRideDistance(ride),
+      0
+    );
+    const points = profileRides.reduce(
+      (total, ride) => total + getRidePoints(ride),
+      0
+    );
+
+    return {
+      id: String(profileId),
+      name:
+        profile?.username ||
+        profile?.name ||
+        profile?.full_name ||
+        profile?.email?.split("@")[0] ||
+        "Rider",
+      photo:
+        profile?.avatar_url ||
+        profile?.photo ||
+        "https://i.pravatar.cc/150?img=14",
+      email: profile?.email || "",
+      status: profile?.status || "Rider",
+      badge: profile?.badge || "Cyclist",
+      isCurrentUser: String(profileId) === String(currentUserId),
+      distance,
+      points,
+      periodRides: profileRides.length,
+    };
+  });
+
+  return rows
+    .sort((first, second) => {
+      if (second.points !== first.points) {
+        return second.points - first.points;
+      }
+
+      return second.distance - first.distance;
+    })
+    .map((row, index) => ({
+      ...row,
+      rank: index + 1,
+    }));
+};
 
 const createCurrentRider = (username = "Username") => ({
   id: "self",
@@ -156,8 +169,8 @@ export const getLeaderboardData = (
 
   return riders
     .sort((first, second) => {
-      const firstStats = first.leaderboardStats[timeframe];
-      const secondStats = second.leaderboardStats[timeframe];
+      const firstStats = getPeriodStats(first, timeframe);
+      const secondStats = getPeriodStats(second, timeframe);
 
       if (secondStats.points !== firstStats.points) {
         return secondStats.points - firstStats.points;
@@ -167,12 +180,9 @@ export const getLeaderboardData = (
     })
     .map((rider, index) => ({
       ...rider,
-      distance: rider.leaderboardStats[timeframe].distance,
-      points: rider.leaderboardStats[timeframe].points,
-      periodRides: rider.leaderboardStats[timeframe].rides,
+      distance: getPeriodStats(rider, timeframe).distance,
+      points: getPeriodStats(rider, timeframe).points,
+      periodRides: getPeriodStats(rider, timeframe).rides,
       rank: index + 1,
     }));
 };
-=======
-export { friends as initialFriends } from "@/features/friends/data";
->>>>>>> upstream/main
