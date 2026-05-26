@@ -50,18 +50,6 @@ Expo shortcuts:
 
 When testing on a phone, the phone must be able to reach the backend using the computer LAN IP. Restart Expo with `-c` after changing `.env`.
 
-## Verification
-
-```bash
-npx expo install --check
-npx expo-doctor
-npx tsc --noEmit
-npx expo export --platform android --output-dir .expo-android-smoke
-npx expo export --platform web --output-dir .expo-web-smoke
-```
-
-The app intentionally keeps mock fallback data for offline/backend failure cases. Backend success with an empty array should render an empty state, not mock users as real data.
-
 ## Company Supabase Handover
 
 1. Apply the backend schema in `redback-smartbike-mobile-back-end/database/schema.sql` to the company Supabase project.
