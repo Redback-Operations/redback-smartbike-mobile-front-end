@@ -1,10 +1,12 @@
-import { View, Text, Image, ActivityIndicator, ScrollView } from "react-native";
+import { View, Text, Image, ActivityIndicator, ScrollView, Switch } from "react-native";
 import React, { useContext } from "react";
 import { LinearGradient } from "expo-linear-gradient";
 import { SafeAreaView } from "react-native-safe-area-context";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import Setting from "@/components/Setting";
 import { AuthContext } from "@/context/authContext";
+import { useTheme } from "@/context/themeContext";
 
 const settingsItems = [
   {
@@ -52,6 +54,7 @@ const settingsItems = [
 
 const Settings = () => {
   const { user, loading } = useContext(AuthContext);
+  const { isDark, toggleTheme } = useTheme();
 
   if (loading) {
     return (
@@ -97,6 +100,26 @@ const Settings = () => {
           <Text className="text-3xl font-bold text-center text-white mb-6">
             Settings
           </Text>
+
+          <View className="bg-[#101010] rounded-2xl px-5 py-3 border border-[#1f1f1f] mb-4">
+            <View className="flex-row items-center justify-between py-3 px-1">
+              <View className="flex-row items-center">
+                <View className="w-8 items-center">
+                  <MaterialIcons name={isDark ? "dark-mode" : "light-mode"} size={20} color="#ff7a6b" />
+                </View>
+                <Text className="ml-2 text-base font-medium text-white">
+                  Dark Mode
+                </Text>
+              </View>
+              <Switch
+                testID="settings-dark-mode-switch"
+                value={isDark}
+                onValueChange={toggleTheme}
+                trackColor={{ false: "#3a3a3a", true: "#ff7a6b" }}
+                thumbColor="#ffffff"
+              />
+            </View>
+          </View>
 
           <View className="bg-[#101010] rounded-2xl px-5 py-3 border border-[#1f1f1f]">
             {settingsItems.map((item, index) => (
