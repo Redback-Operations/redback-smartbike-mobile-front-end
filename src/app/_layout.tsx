@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from "@/context/authContext";
+import { isSupabaseConfigured } from "@/lib/supabase";
 import { Stack, usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -18,6 +19,13 @@ const AppNavigator = () => {
 
     const isPublicScreen = pathname === "/dashboard";
     const isAuthCallbackScreen = pathname.startsWith("/auth/callback");
+
+    if (!isSupabaseConfigured) {
+      if (isAuthOnlyScreen || isAuthCallbackScreen) {
+        router.replace("/(tabs)/home");
+      }
+      return;
+    }
 
     if (!user && !isAuthOnlyScreen && !isPublicScreen && !isAuthCallbackScreen) {
       router.replace("/");
@@ -51,17 +59,23 @@ const AppNavigator = () => {
       <Stack.Screen name="forgot-password" options={{ headerShown: false }} />
       <Stack.Screen name="dashboard" options={{ headerShown: false }} />
       <Stack.Screen name="auth/callback" options={{ headerShown: false }} />
+      <Stack.Screen name="deviceStatus" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="customWorkoutBuilder"
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="workoutSchedule" options={{ headerShown: false }} />
 
-          <Stack.Screen name="chat/index" options={{ headerShown: false }} />
-          <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
+      <Stack.Screen name="chat/index" options={{ headerShown: false }} />
+      <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
 
-          <Stack.Screen
-            name="(scheduleWorkout)"
-            options={{
-              presentation: "modal",
-              headerShown: false,
-            }}
-          />
+      <Stack.Screen
+        name="(scheduleWorkout)"
+        options={{
+          presentation: "modal",
+          headerShown: false,
+        }}
+      />
 
       <Stack.Screen
         name="(deleteAccountConfirmation)"
@@ -108,22 +122,22 @@ const AppNavigator = () => {
         }}
       />
 
-          <Stack.Screen
-            name="currentWorkout"
-            options={{
-              headerShown: true,
-              headerTitle: "",
-              headerTintColor: "white",
-            }}
-          />
+      <Stack.Screen
+        name="currentWorkout"
+        options={{
+          headerShown: true,
+          headerTitle: "",
+          headerTintColor: "white",
+        }}
+      />
 
-          <Stack.Screen
-            name="leaderboard"
-            options={{
-              headerShown: false,
-            }}
-          />
-        </Stack>
+      <Stack.Screen
+        name="leaderboard"
+        options={{
+          headerShown: false,
+        }}
+      />
+    </Stack>
   );
 };
 
