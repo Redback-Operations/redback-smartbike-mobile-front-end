@@ -17,38 +17,63 @@ const quickStats = [
   { title: "Calories", value: "1840" },
 ];
 
-const secondaryTiles = [
-  {
-    title: "Leaderboard",
-    subtitle: "See who leads this week",
-    link: "/leaderboard",
-    wide: true,
-    icon: <MaterialIcons name="leaderboard" size={32} color="#EB7363" />,
-  },
-  {
-    title: "Groups",
-    subtitle: "Join ride groups",
-    link: "/groups",
-    icon: <MaterialIcons name="groups" size={32} color="#EB7363" />,
-  },
-  {
-    title: "Schedule",
-    subtitle: "Plan your training",
-    link: "/workoutSchedule",
-    icon: <AntDesign name="calendar" size={32} color="#EB7363" />,
-  },
-  {
-    title: "Friends",
-    subtitle: "See your riders",
-    link: "/friendslist",
-    icon: <MaterialIcons name="group" size={32} color="#EB7363" />,
-  },
-  {
-    title: "Current Workout",
-    subtitle: "Continue your session",
-    link: "/currentWorkout",
-    icon: <FontAwesome5 name="running" size={32} color="#22C55E" />,
-  },
+const moreFeatureRows = [
+  [
+    {
+      title: "Leaderboard",
+      subtitle: "See who leads this week",
+      link: "/leaderboard",
+      size: "wide",
+      icon: <MaterialIcons name="leaderboard" size={30} color="#EB7363" />,
+    },
+  ],
+  [
+    {
+      title: "Groups",
+      subtitle: "Join ride groups",
+      link: "/groups",
+      size: "wide",
+      icon: <MaterialIcons name="groups" size={30} color="#EB7363" />,
+    },
+    {
+      title: "Schedule",
+      subtitle: "Plan your training",
+      link: "/workoutSchedule",
+      size: "narrow",
+      icon: <AntDesign name="calendar" size={30} color="#EB7363" />,
+    },
+  ],
+  [
+    {
+      title: "Device Status",
+      subtitle: "Check bike, sensors and battery",
+      link: "/deviceStatus",
+      size: "wide",
+      icon: (
+        <MaterialCommunityIcons
+          name="bike-fast"
+          size={30}
+          color="#EB7363"
+        />
+      ),
+    },
+    {
+      title: "Friends",
+      subtitle: "See your riders",
+      link: "/friendslist",
+      size: "narrow",
+      icon: <MaterialIcons name="group" size={30} color="#EB7363" />,
+    },
+  ],
+  [
+    {
+      title: "Current Workout",
+      subtitle: "Continue your session",
+      link: "/currentWorkout",
+      size: "wide",
+      icon: <FontAwesome5 name="running" size={30} color="#22C55E" />,
+    },
+  ],
 ];
 
 const StatCard = ({ item }) => {
@@ -65,7 +90,7 @@ const FeaturedCard = ({ title, subtitle, link, icon }) => {
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => router.push(link)}
-      className="flex-1 bg-[#15171C] rounded-2xl p-4 min-h-[180px] justify-between"
+      className="bg-[#15171C] rounded-2xl p-4 min-h-[120px] justify-between border border-[#1F2937]"
     >
       <View className="flex-row justify-between items-start">
         <View className="flex-1 pr-3">
@@ -82,12 +107,14 @@ const FeaturedCard = ({ title, subtitle, link, icon }) => {
   );
 };
 
-const SmallTile = ({ item }) => {
+const MoreFeatureTile = ({ item }) => {
+  const isWide = item.size === "wide";
+
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => router.push(item.link)}
-      className={`${item.wide ? "w-full min-h-[150px]" : "w-[48.5%] min-h-[140px]"} bg-[#15171C] rounded-2xl p-4 justify-between`}
+      className={`${isWide ? "flex-1 min-h-[94px]" : "w-[26%] min-h-[94px]"} bg-[#15171C] rounded-2xl p-4 justify-between border border-[#1F2937]`}
     >
       <View>{item.icon}</View>
 
@@ -140,21 +167,27 @@ const Home = () => {
           </Text>
         </View>
 
-        <View className="flex-row gap-4 mb-5">
-          <FeaturedCard
-            title="Connect"
-            subtitle="Ride with others and stay social"
-            link="/connect"
-            icon={<MaterialIcons name="people-alt" size={36} color="#EB7363" />}
-          />
-          <FeaturedCard
-            title="Start workout"
-            subtitle="Begin a new cycling session"
-            link="/startworkout"
-            icon={
-              <MaterialCommunityIcons name="bike" size={36} color="#EB7363" />
-            }
-          />
+        <View className="flex-row gap-3 mb-5">
+          <View className="flex-1">
+            <FeaturedCard
+              title="Connect"
+              subtitle="Ride with others and stay social"
+              link="/connect"
+              icon={
+                <MaterialIcons name="people-alt" size={34} color="#EB7363" />
+              }
+            />
+          </View>
+          <View className="w-[28%]">
+            <FeaturedCard
+              title="Start workout"
+              subtitle="Begin a new cycling session"
+              link="/startworkout"
+              icon={
+                <MaterialCommunityIcons name="bike" size={34} color="#EB7363" />
+              }
+            />
+          </View>
         </View>
 
         <View className="mb-3">
@@ -164,9 +197,16 @@ const Home = () => {
           </Text>
         </View>
 
-        <View className="flex-row flex-wrap justify-between gap-y-4">
-          {secondaryTiles.map((item) => (
-            <SmallTile key={item.title} item={item} />
+        <View className="gap-y-3">
+          {moreFeatureRows.map((row, index) => (
+            <View
+              key={`row-${index}`}
+              className="flex-row justify-between gap-3"
+            >
+              {row.map((item) => (
+                <MoreFeatureTile key={item.title} item={item} />
+              ))}
+            </View>
           ))}
         </View>
       </ScrollView>

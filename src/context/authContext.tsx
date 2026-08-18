@@ -7,7 +7,11 @@ import React, {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import * as Linking from "expo-linking";
-import { supabase } from "@/lib/supabase";
+import {
+  isSupabaseConfigured,
+  SUPABASE_DISABLED_MESSAGE,
+  supabase,
+} from "@/lib/supabase";
 
 type OAuthProvider = "apple" | "facebook" | "google";
 
@@ -15,7 +19,7 @@ type FormattedUser = {
   id: string;
   username: string;
   email: string;
-  rawUser: User;
+  rawUser: User | null;
 } | null;
 
 type AuthContextType = {
@@ -32,6 +36,13 @@ type AuthContextType = {
 };
 
 export const AuthContext = createContext<AuthContextType | null>(null);
+
+const previewUser: NonNullable<FormattedUser> = {
+  id: "preview-user",
+  username: "Preview Rider",
+  email: "preview@redback.local",
+  rawUser: null,
+};
 
 const formatUser = (supabaseUser: User | null | undefined): FormattedUser => {
   if (!supabaseUser) return null;
@@ -52,6 +63,10 @@ export const ensureUserProfile = async (
   username = "",
 ) => {
   if (!supabaseUser?.id) {
+    return { data: null, error: null };
+  }
+
+  if (!supabase) {
     return { data: null, error: null };
   }
 
@@ -147,6 +162,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isSupabaseConfigured || !supabase) {
+      setSession(null);
+      setUser(previewUser);
+      setLoading(false);
+      console.warn(SUPABASE_DISABLED_MESSAGE);
+      return;
+    }
+
+    const supabaseClient = supabase;
     let mounted = true;
 
     const handleOAuthCallback = async (url: string | null) => {
@@ -166,7 +190,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (!params.accessToken || !params.refreshToken) return;
 
-      const { data, error } = await supabase.auth.setSession({
+      const { data, error } = await supabaseClient.auth.setSession({
         access_token: params.accessToken,
         refresh_token: params.refreshToken,
       });
@@ -185,7 +209,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const getInitialSession = async () => {
       try {
-        const { data, error } = await withTimeout(supabase.auth.getSession());
+        const { data, error } = await withTimeout(
+          supabaseClient.auth.getSession(),
+        );
 
         if (error) {
           console.warn("Get session error:", error.message);
@@ -215,7 +241,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    } = supabaseClient.auth.onAuthStateChange((_event, newSession) => {
       repairUserProfile(newSession?.user);
       setSession(newSession ?? null);
       setUser(formatUser(newSession?.user));
@@ -237,6 +263,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       supabase,
 
       signIn: async (email: string, password: string) => {
+        if (!supabase) {
+          setUser(previewUser);
+          setLoading(false);
+          return { data: { session: null, user: null }, error: null };
+        }
+
         const response = await supabase.auth.signInWithPassword({
           email: email.trim(),
           password,
@@ -252,6 +284,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
 
       signUp: async (email: string, password: string, username = "") => {
+        if (!supabase) {
+          setUser({
+            ...previewUser,
+            username: username.trim() || previewUser.username,
+            email: email.trim() || previewUser.email,
+          });
+          return { data: { session: null, user: null }, error: null };
+        }
+
         const response = await supabase.auth.signUp({
           email: email.trim(),
           password,
@@ -271,31 +312,42 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           setUser(formatUser(response.data.session.user));
         }
 
+        return response;
+      },
+
+      signInWithOAuth: async (provider: OAuthProvider) => {
+        if (!supabase) {
+          setUser(previewUser);
+          return { data: { provider }, error: null };
+        }
+
+        const redirectTo = Linking.createURL("auth/callback");
+
+        const response = await supabase.auth.signInWithOAuth({
+          provider,
+          options: {
+            redirectTo,
+            skipBrowserRedirect: true,
+          },
+        });
+
+        if (response.error || !response.data?.url) {
           return response;
-        },
+        }
 
-        signInWithOAuth: async (provider: OAuthProvider) => {
-          const redirectTo = Linking.createURL("auth/callback");
+        await Linking.openURL(response.data.url);
 
-          const response = await supabase.auth.signInWithOAuth({
-            provider,
-            options: {
-              redirectTo,
-              skipBrowserRedirect: true,
-            },
-          });
+        return response;
+      },
 
-          if (response.error || !response.data?.url) {
-            return response;
-          }
+      signOut: async () => {
+        if (!supabase) {
+          setSession(null);
+          setUser(previewUser);
+          return { error: null };
+        }
 
-          await Linking.openURL(response.data.url);
-
-          return response;
-        },
-
-        signOut: async () => {
-          const response = await supabase.auth.signOut();
+        const response = await supabase.auth.signOut();
 
         if (!response.error) {
           setSession(null);
@@ -306,6 +358,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       },
 
       resetPassword: async (email: string) => {
+        if (!supabase) {
+          return {
+            data: null,
+            error: { message: SUPABASE_DISABLED_MESSAGE },
+          };
+        }
+
         return await supabase.auth.resetPasswordForEmail(email.trim());
       },
 

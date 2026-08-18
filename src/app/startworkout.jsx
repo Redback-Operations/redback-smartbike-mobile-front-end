@@ -64,6 +64,20 @@ const workoutOptions = [
     icon: <AntDesign name="calendar" size={24} color="#FF8A65" />,
     link: "/workoutSchedule",
   },
+  {
+    title: "Custom Workout",
+    subtitle: "Build your own session through the workout GUI",
+    difficulty: "Custom",
+    duration: "Flexible",
+    icon: (
+      <MaterialCommunityIcons
+        name="playlist-edit"
+        size={24}
+        color="#FF8A65"
+      />
+    ),
+    link: "/customWorkoutBuilder",
+  },
 ];
 
 const getBadgeStyle = (difficulty) => {
