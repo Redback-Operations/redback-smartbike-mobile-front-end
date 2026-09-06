@@ -71,7 +71,10 @@
     ],
     "setupFiles": [
       "./jest.setup.js"
-    ]
+    ],
+    "moduleNameMapper": {
+      "\\.(css|scss|sass)$": "<rootDir>/jest-css-mock.js"
+    }
   },
   "private": true
 }

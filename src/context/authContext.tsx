@@ -237,42 +237,91 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       supabase,
 
       signIn: async (email: string, password: string) => {
-        const response = await supabase.auth.signInWithPassword({
-          email: email.trim(),
-          password,
-        });
+        const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+        
+        try {
+          const response = await fetch(`${apiUrl}/api/users/login`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email: email.trim(), password }),
+          });
 
-        if (response?.data?.session) {
-          await ensureUserProfile(response.data.session.user);
-          setSession(response.data.session);
-          setUser(formatUser(response.data.session.user));
+          const result = await response.json();
+
+          if (!response.ok || result.error) {
+            return {
+              data: null,
+              error: { message: result.message || 'Login failed' },
+            };
+          }
+
+          const { user, session } = result.data;
+
+          if (session && user) {
+            await supabase.auth.setSession(session);
+            await ensureUserProfile(user);
+            setSession(session);
+            setUser(formatUser(user));
+          }
+
+          return { data: result.data, error: null };
+        } catch (err) {
+          console.error('Login failed:', err);
+          return {
+            data: null,
+            error: { message: (err as Error).message || 'Login failed' },
+          };
         }
-
-        return response;
       },
 
       signUp: async (email: string, password: string, username = "") => {
-        const response = await supabase.auth.signUp({
-          email: email.trim(),
-          password,
-          options: {
-            data: {
-              username: username.trim(),
+        const apiUrl = process.env.EXPO_PUBLIC_API_URL;
+        
+        try {
+          const response = await fetch(`${apiUrl}/api/users/signup`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
             },
-          },
-        });
+            body: JSON.stringify({
+              email: email.trim(),
+              password,
+              username: username.trim(),
+            }),
+          });
 
-        if (response?.data?.user) {
-          await ensureUserProfile(response.data.user, username);
+          const result = await response.json();
+
+          if (!response.ok || result.error) {
+            return {
+              data: null,
+              error: { message: result.message || 'Signup failed' },
+            };
+          }
+
+          const { user, session } = result.data;
+
+          if (user) {
+            await ensureUserProfile(user, username);
+          }
+
+          if (session && user) {
+            await supabase.auth.setSession(session);
+            setSession(session);
+            setUser(formatUser(user));
+          }
+
+          return { data: result.data, error: null };
+        } catch (err) {
+          console.error('Signup failed:', err);
+          return {
+            data: null,
+            error: { message: (err as Error).message || 'Signup failed' },
+          };
         }
-
-        if (response?.data?.session) {
-          setSession(response.data.session);
-          setUser(formatUser(response.data.session.user));
-        }
-
-          return response;
-        },
+      },
 
         signInWithOAuth: async (provider: OAuthProvider) => {
           const redirectTo = Linking.createURL("auth/callback");

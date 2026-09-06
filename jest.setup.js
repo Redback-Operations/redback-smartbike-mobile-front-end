@@ -14,3 +14,9 @@ jest.mock("react-native-gifted-charts", () => {
   const { View } = require("react-native");
   return { LineChart: View, BarChart: View };
 });
+
+// Mock @expo/metro-runtime
+jest.mock("@expo/metro-runtime", () => ({}));
+
+// Mock global alert function for React Native
+global.alert = jest.fn();
