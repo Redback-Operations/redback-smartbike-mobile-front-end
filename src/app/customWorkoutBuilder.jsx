@@ -367,8 +367,8 @@ export default function CustomWorkoutBuilder() {
         "Your custom workout has been saved and is ready to use.",
         [
           {
-            text: "View Saved Workouts",
-            onPress: () => router.push("/workoutSchedule"),
+            text: "Open Calendar",
+            onPress: () => router.push("/calendar"),
           },
           {
             text: "Keep Editing",

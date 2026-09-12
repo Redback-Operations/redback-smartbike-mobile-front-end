@@ -62,7 +62,7 @@ const workoutOptions = [
     difficulty: "Planned",
     duration: "Varies",
     icon: <AntDesign name="calendar" size={24} color="#FF8A65" />,
-    link: "/workoutSchedule",
+    link: "/calendar",
   },
   {
     title: "Custom Workout",

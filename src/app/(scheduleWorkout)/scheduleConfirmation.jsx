@@ -23,9 +23,12 @@ const ScheduleConfirmation = () => {
             Return Home
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity className="flex-1 bg-brand-purple rounded-xl">
+        <TouchableOpacity
+          onPress={() => router.replace("/calendar")}
+          className="flex-1 bg-brand-purple rounded-xl"
+        >
           <Text className="text-center text-white font-semibold  p-4">
-            Add To Your Calendar
+            View Calendar
           </Text>
         </TouchableOpacity>
       </View>

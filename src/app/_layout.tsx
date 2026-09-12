@@ -65,6 +65,8 @@ const AppNavigator = () => {
         options={{ headerShown: false }}
       />
       <Stack.Screen name="workoutSchedule" options={{ headerShown: false }} />
+      <Stack.Screen name="calendarPlanner" options={{ headerShown: false }} />
+      <Stack.Screen name="coach" options={{ headerShown: false }} />
 
       <Stack.Screen name="chat/index" options={{ headerShown: false }} />
       <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />

@@ -20,13 +20,13 @@ const AndroidTimeDatePickers = ({ date, setDate, time, setTime }) => {
       <View className="flex-row gap-4 justify-between">
         <TouchableOpacity
           onPress={() => setShowDatePicker(true)}
-          className="bg-brand-purple rounded-xl p-4"
+          className="bg-[#1D2432] border border-[#303B4D] rounded-xl px-4 py-3"
         >
           <Text className="text-white">Select Date</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setShowTimePicker(true)}
-          className="bg-brand-purple p-4 rounded-xl"
+          className="bg-[#1D2432] border border-[#303B4D] px-4 py-3 rounded-xl"
         >
           <Text className="text-white">Select Time</Text>
         </TouchableOpacity>

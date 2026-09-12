@@ -164,7 +164,7 @@ const Workouts = () => {
 
               <TouchableOpacity
                 activeOpacity={0.85}
-                onPress={() => router.push("/workoutSchedule")}
+                onPress={() => router.push("/calendar")}
                 className="w-12 h-12 rounded-2xl bg-[#111111] border border-[#1f1f1f] items-center justify-center"
               >
                 <FontAwesome6 name="calendar-plus" size={18} color="#EB7363" />

@@ -20,6 +20,22 @@ const quickStats = [
 const moreFeatureRows = [
   [
     {
+      title: "Calendar",
+      subtitle: "View your planned workouts",
+      link: "/calendar",
+      size: "wide",
+      icon: <AntDesign name="calendar" size={30} color="#EB7363" />,
+    },
+    {
+      title: "Coach",
+      subtitle: "Get training guidance",
+      link: "/coach",
+      size: "narrow",
+      icon: <MaterialIcons name="psychology" size={30} color="#22C55E" />,
+    },
+  ],
+  [
+    {
       title: "Leaderboard",
       subtitle: "See who leads this week",
       link: "/leaderboard",
@@ -38,7 +54,7 @@ const moreFeatureRows = [
     {
       title: "Schedule",
       subtitle: "Plan your training",
-      link: "/workoutSchedule",
+      link: "/calendar",
       size: "narrow",
       icon: <AntDesign name="calendar" size={30} color="#EB7363" />,
     },
