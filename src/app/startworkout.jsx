@@ -62,7 +62,21 @@ const workoutOptions = [
     difficulty: "Planned",
     duration: "Varies",
     icon: <AntDesign name="calendar" size={24} color="#FF8A65" />,
-    link: "/workoutSchedule",
+    link: "/calendar",
+  },
+  {
+    title: "Custom Workout",
+    subtitle: "Build your own session through the workout GUI",
+    difficulty: "Custom",
+    duration: "Flexible",
+    icon: (
+      <MaterialCommunityIcons
+        name="playlist-edit"
+        size={24}
+        color="#FF8A65"
+      />
+    ),
+    link: "/customWorkoutBuilder",
   },
 ];
 

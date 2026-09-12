@@ -25,16 +25,33 @@ const _layout = () => {
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarShowLabel: false,
+        tabBarShowLabel: true,
+        tabBarActiveTintColor: "#F27467",
+        tabBarInactiveTintColor: "#747986",
+        tabBarStyle: {
+          backgroundColor: "#0D0F14",
+          borderTopColor: "#20232B",
+          borderTopWidth: 1,
+          height: 70,
+          paddingTop: 8,
+          paddingBottom: 8,
+        },
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: "600",
+          marginTop: 2,
+        },
         tabBarItemStyle: {
           borderTopWidth: 0,
+          borderRadius: 14,
+          marginHorizontal: 2,
         },
       }}
     >
       <Tabs.Screen
         name="home"
         options={{
-          title: "home",
+          title: "Home",
           tabBarIcon: ({ focused }) => (
             <Entypo
               name="home"
@@ -48,7 +65,7 @@ const _layout = () => {
       <Tabs.Screen
         name="statistics"
         options={{
-          title: "statistics",
+          title: "Stats",
           tabBarIcon: ({ focused }) => (
             <Entypo
               name="bar-graph"
@@ -62,7 +79,7 @@ const _layout = () => {
       <Tabs.Screen
         name="workouts"
         options={{
-          title: "workouts",
+          title: "Workouts",
           tabBarIcon: ({ focused }) => (
             <MaterialCommunityIcons
               name="weight-lifter"
@@ -74,9 +91,23 @@ const _layout = () => {
       />
 
       <Tabs.Screen
+        name="calendar"
+        options={{
+          title: "Calendar",
+          tabBarIcon: ({ focused }) => (
+            <MaterialCommunityIcons
+              name="calendar-month"
+              size={24}
+              color={focused ? "#EB7363" : "gray"}
+            />
+          ),
+        }}
+      />
+
+      <Tabs.Screen
         name="friends"
         options={{
-          title: "friends",
+          title: "Friends",
           tabBarIcon: ({ focused }) => (
             <FontAwesome5
               name="users"
@@ -90,7 +121,7 @@ const _layout = () => {
       <Tabs.Screen
         name="settings"
         options={{
-          title: "settings",
+          title: "Settings",
           tabBarIcon: ({ focused }) => (
             <Entypo
               name="cog"

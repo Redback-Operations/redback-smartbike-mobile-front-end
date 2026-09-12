@@ -9,7 +9,7 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "../../global.css";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import TextInputWithLogo from "@/components/TextInputWithLogo";
@@ -18,10 +18,21 @@ import { Link, router } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/context/authContext";
+import { isSupabaseConfigured } from "@/lib/supabase";
 
 const index = () => {
   const { signIn, signInWithOAuth } = useAuth();
   const [loginData, setLoginData] = useState({ email: "", password: "" });
+
+  useEffect(() => {
+    if (!isSupabaseConfigured) {
+      router.replace("/(tabs)/home");
+    }
+  }, []);
+
+  if (!isSupabaseConfigured) {
+    return null;
+  }
 
   const handleLogin = async () => {
     if (!loginData.email || !loginData.password) {

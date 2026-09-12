@@ -1,59 +1,99 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  View,
-  Text,
-  StyleSheet,
   ActivityIndicator,
   ScrollView,
-  SafeAreaView,
-  StatusBar,
+  StyleSheet,
+  Text,
   TouchableOpacity,
+  View,
   useWindowDimensions,
-} from 'react-native';
-import { LineChart } from 'react-native-gifted-charts';
-import { LinearGradient } from 'expo-linear-gradient';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import FontAwesome5 from '@expo/vector-icons/FontAwesome5';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+} from "react-native";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { LineChart } from "react-native-gifted-charts";
+import CustomSafeArea from "@/components/CustomSafeArea";
 
 const mockData = [
-  { day: 'Mon', minutes: 22 },
-  { day: 'Tue', minutes: 48 },
-  { day: 'Wed', minutes: 26 },
-  { day: 'Thu', minutes: 55 },
-  { day: 'Fri', minutes: 99 },
-  { day: 'Sat', minutes: 35 },
-  { day: 'Sun', minutes: 20 },
+  { day: "Mon", minutes: 22 },
+  { day: "Tue", minutes: 48 },
+  { day: "Wed", minutes: 26 },
+  { day: "Thu", minutes: 55 },
+  { day: "Fri", minutes: 99 },
+  { day: "Sat", minutes: 35 },
+  { day: "Sun", minutes: 20 },
 ];
 
 const caloriesData = [
-  { day: 'Mon', calories: 180 },
-  { day: 'Tue', calories: 320 },
-  { day: 'Wed', calories: 210 },
-  { day: 'Thu', calories: 390 },
-  { day: 'Fri', calories: 540 },
-  { day: 'Sat', calories: 260 },
-  { day: 'Sun', calories: 170 },
+  { day: "Mon", calories: 180 },
+  { day: "Tue", calories: 320 },
+  { day: "Wed", calories: 210 },
+  { day: "Thu", calories: 390 },
+  { day: "Fri", calories: 540 },
+  { day: "Sat", calories: 260 },
+  { day: "Sun", calories: 170 },
 ];
 
 const workoutSummary = {
-  totalDistance: '92.4 km',
+  totalDistance: "92.4 km",
   calories: 3250,
-  avgHeartRate: '148 bpm',
-  longestRide: '99 min',
+  avgHeartRate: "148 bpm",
+  longestRide: "99 min",
 };
 
 const recentWorkouts = [
-  { id: 1, title: 'Morning Ride', duration: '35 min', calories: '280 cal' },
-  { id: 2, title: 'Hill Climb', duration: '42 min', calories: '360 cal' },
-  { id: 3, title: 'Recovery Ride', duration: '20 min', calories: '140 cal' },
+  { id: 1, title: "Morning Ride", duration: "35 min", calories: "280 cal" },
+  { id: 2, title: "Hill Climb", duration: "42 min", calories: "360 cal" },
+  { id: 3, title: "Recovery Ride", duration: "20 min", calories: "140 cal" },
 ];
 
-export default function RedbackWeeklySummary() {
+const summaryCards = [
+  {
+    label: "Distance",
+    value: workoutSummary.totalDistance,
+    icon: <FontAwesome5 name="biking" size={22} color="#EB7363" />,
+  },
+  {
+    label: "Calories",
+    value: String(workoutSummary.calories),
+    icon: <MaterialCommunityIcons name="fire" size={24} color="#FFB347" />,
+  },
+  {
+    label: "Avg Heart Rate",
+    value: workoutSummary.avgHeartRate,
+    icon: <MaterialIcons name="favorite" size={22} color="#FF6B6B" />,
+  },
+  {
+    label: "Longest Ride",
+    value: workoutSummary.longestRide,
+    icon: <MaterialIcons name="timer" size={22} color="#7DD3FC" />,
+  },
+];
+
+const StatsCard = ({ label, value, icon }) => {
+  return (
+    <View style={styles.metricCard}>
+      <View style={styles.metricIconWrap}>{icon}</View>
+      <Text style={styles.metricLabel}>{label}</Text>
+      <Text style={styles.metricValue}>{value}</Text>
+    </View>
+  );
+};
+
+const InfoCard = ({ label, value }) => {
+  return (
+    <View style={styles.infoCard}>
+      <Text style={styles.infoLabel}>{label}</Text>
+      <Text style={styles.infoValue}>{value}</Text>
+    </View>
+  );
+};
+
+export default function StatisticsScreen() {
   const { width: screenWidth } = useWindowDimensions();
   const [loading, setLoading] = useState(true);
   const [rideData, setRideData] = useState([]);
-  const [selectedChart, setSelectedChart] = useState('Minutes');
+  const [selectedChart, setSelectedChart] = useState("Minutes");
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -64,13 +104,12 @@ export default function RedbackWeeklySummary() {
     return () => clearTimeout(timer);
   }, []);
 
-  const totalMinutes = rideData.reduce((sum, d) => sum + d.minutes, 0);
-  const activeDays = rideData.filter((d) => d.minutes > 0).length;
-
+  const totalMinutes = rideData.reduce((sum, entry) => sum + entry.minutes, 0);
+  const activeDays = rideData.filter((entry) => entry.minutes > 0).length;
   const bestDay =
     rideData.length > 0
       ? rideData.reduce((prev, current) =>
-          current.minutes > prev.minutes ? current : prev
+          current.minutes > prev.minutes ? current : prev,
         )
       : null;
 
@@ -89,91 +128,104 @@ export default function RedbackWeeklySummary() {
   }));
 
   const currentLineData =
-    selectedChart === 'Minutes' ? minutesLineData : caloriesLineData;
+    selectedChart === "Minutes" ? minutesLineData : caloriesLineData;
 
-  const chartCardHorizontalPadding = 18;
-  const chartWidth = screenWidth - 30 - chartCardHorizontalPadding * 2;
-
+  const chartWidth = screenWidth - 32 - 24 * 2;
   const pointCount = currentLineData.length;
   const usableSpacing =
     pointCount > 1 ? chartWidth / (pointCount - 1) : chartWidth;
-
-  const spacing = Math.min(Math.max(usableSpacing, 35), 65);
+  const spacing = Math.min(Math.max(usableSpacing, 35), 60);
 
   const peakPoint =
     currentLineData.length > 0
       ? currentLineData.reduce((prev, current) =>
-          current.value > prev.value ? current : prev
+          current.value > prev.value ? current : prev,
         )
       : null;
 
-  const chartColor = selectedChart === 'Minutes' ? '#ffffff' : '#FFD700';
-  const tabActiveColor = selectedChart === 'Minutes' ? '#3A0A50' : '#FFD700';
-  const tabActiveTextColor = selectedChart === 'Minutes' ? '#fff' : '#3A0A50';
+  const chartColor = selectedChart === "Minutes" ? "#EB7363" : "#FFB347";
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView contentContainerStyle={styles.container}>
-        <View style={styles.headerRow}>
-          <View>
+    <CustomSafeArea applyTopInset={false} bgColour="#050505">
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.container}
+      >
+        <View style={styles.header}>
+          <View style={styles.headerCopy}>
             <Text style={styles.title}>Track your stats</Text>
-            <Text style={styles.subtitle}>Weekly SmartBike ride progress</Text>
+            <Text style={styles.subtitle}>
+              Weekly SmartBike ride progress in the same Redback theme.
+            </Text>
           </View>
 
-          <MaterialIcons name="insert-chart" size={30} color="#3A0A50" style={styles.headerIcon} />
+          <View style={styles.headerIconButton}>
+            <MaterialIcons name="insert-chart" size={22} color="#EB7363" />
+          </View>
         </View>
 
         {loading ? (
-          <ActivityIndicator size="large" color="#3A0A50" style={styles.loader} />
+          <View style={styles.loadingState}>
+            <ActivityIndicator size="large" color="#EB7363" />
+          </View>
         ) : (
           <>
-            <View style={styles.cardGrid}>
-              <LinearGradient
-                colors={['#ffaaa8', '#ff3838']}
-                style={styles.summaryCard}
-              >
-                <FontAwesome5 name="biking" size={24} color="#ffffff" />
-                <Text style={styles.cardLabel}>Distance</Text>
-                <Text style={styles.cardValue}>{workoutSummary.totalDistance}</Text>
-              </LinearGradient>
+            <View style={styles.heroCard}>
+              <View style={styles.heroTop}>
+                <View style={{ flex: 1, paddingRight: 16 }}>
+                  <Text style={styles.heroEyebrow}>Weekly Snapshot</Text>
+                  <Text style={styles.heroTitle}>
+                    {bestDay
+                      ? `${bestDay.minutes} mins on ${bestDay.day}`
+                      : "No rides logged yet"}
+                  </Text>
+                  <Text style={styles.heroCopy}>
+                    Your strongest session this week sets the tone for the rest
+                    of your training rhythm.
+                  </Text>
+                </View>
 
-              <LinearGradient
-                colors={['#bcb8f0', '#5b5be0']}
-                style={styles.summaryCard}
-              >
-                <MaterialCommunityIcons name="fire" size={26} color="#ffffff" />
-                <Text style={styles.cardLabel}>Calories</Text>
-                <Text style={styles.cardValue}>{workoutSummary.calories}</Text>
-              </LinearGradient>
+                <View style={styles.heroBadge}>
+                  <MaterialCommunityIcons
+                    name="bike-fast"
+                    size={28}
+                    color="#050505"
+                  />
+                </View>
+              </View>
 
-              <LinearGradient
-                colors={['#ffd4a3', '#ff9100']}
-                style={styles.summaryCard}
-              >
-                <MaterialIcons name="favorite" size={26} color="#ffffff" />
-                <Text style={styles.cardLabel}>Avg Heart Rate</Text>
-                <Text style={styles.cardValue}>{workoutSummary.avgHeartRate}</Text>
-              </LinearGradient>
-
-              <LinearGradient
-                colors={['#f5b3d5', '#ee56aa']}
-                style={styles.summaryCard}
-              >
-                <MaterialIcons name="timer" size={26} color="#ffffff" />
-                <Text style={styles.cardLabel}>Longest Ride</Text>
-                <Text style={styles.cardValue}>{workoutSummary.longestRide}</Text>
-              </LinearGradient>
+              <View style={styles.heroStats}>
+                <InfoCard label="Ride time" value={formattedTotalTime} />
+                <InfoCard label="Active days" value={`${activeDays} days`} />
+                <InfoCard
+                  label="Trend"
+                  value={selectedChart === "Minutes" ? "Steady" : "Burn"}
+                />
+              </View>
             </View>
 
-            <LinearGradient
-              colors={['#2bb8ad', '#2bb8ad']}
-              style={styles.chartCard}
-            >
-              <View style={styles.chartHeader}>
-                <Text style={styles.chartTitle}>Ride Trends</Text>
+            <View style={styles.metricsGrid}>
+              {summaryCards.map((card) => (
+                <StatsCard
+                  key={card.label}
+                  label={card.label}
+                  value={card.value}
+                  icon={card.icon}
+                />
+              ))}
+            </View>
+
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionHeader}>
+                <View>
+                  <Text style={styles.sectionTitle}>Ride Trends</Text>
+                  <Text style={styles.sectionSubtitle}>
+                    Compare weekly minutes and calories
+                  </Text>
+                </View>
 
                 <View style={styles.chartTabs}>
-                  {['Minutes', 'Calories'].map((tab) => {
+                  {["Minutes", "Calories"].map((tab) => {
                     const isActive = selectedChart === tab;
 
                     return (
@@ -182,13 +234,13 @@ export default function RedbackWeeklySummary() {
                         onPress={() => setSelectedChart(tab)}
                         style={[
                           styles.chartTab,
-                          isActive && { backgroundColor: tabActiveColor },
+                          isActive && styles.chartTabActive,
                         ]}
                       >
                         <Text
                           style={[
                             styles.chartTabText,
-                            isActive && { color: tabActiveTextColor },
+                            isActive && styles.chartTabTextActive,
                           ]}
                         >
                           {tab}
@@ -199,7 +251,7 @@ export default function RedbackWeeklySummary() {
                 </View>
               </View>
 
-              <View style={styles.chartInner}>
+              <View style={styles.chartWrap}>
                 <LineChart
                   data={currentLineData}
                   curved
@@ -208,17 +260,17 @@ export default function RedbackWeeklySummary() {
                   hideDataPoints={false}
                   dataPointsColor={chartColor}
                   dataPointsRadius={4}
-                  yAxisColor="rgba(255,255,255,0.45)"
-                  xAxisColor="rgba(255,255,255,0.45)"
-                  rulesColor="rgba(255,255,255,0.25)"
-                  yAxisTextStyle={{ color: '#ffffff', fontWeight: '700' }}
-                  xAxisLabelTextStyle={{ color: '#ffffff', fontWeight: '700' }}
+                  yAxisColor="rgba(255,255,255,0.16)"
+                  xAxisColor="rgba(255,255,255,0.16)"
+                  rulesColor="rgba(255,255,255,0.12)"
+                  yAxisTextStyle={{ color: "#8b8b95", fontWeight: "600" }}
+                  xAxisLabelTextStyle={{ color: "#8b8b95", fontWeight: "600" }}
                   backgroundColor="transparent"
                   noOfSections={4}
-                  maxValue={selectedChart === 'Minutes' ? 120 : 600}
+                  maxValue={selectedChart === "Minutes" ? 120 : 600}
                   width={chartWidth}
                   spacing={spacing}
-                  initialSpacing={25}
+                  initialSpacing={18}
                   endSpacing={10}
                   isAnimated
                   animateOnDataChange
@@ -229,8 +281,8 @@ export default function RedbackWeeklySummary() {
                     pointerStripWidth: 1,
                     pointerColor: chartColor,
                     radius: 6,
-                    pointerLabelWidth: 90,
-                    pointerLabelHeight: 50,
+                    pointerLabelWidth: 96,
+                    pointerLabelHeight: 54,
                     activatePointersOnLongPress: true,
                     autoAdjustPointerLabelPosition: true,
                     pointerLabelComponent: (items) => {
@@ -244,7 +296,8 @@ export default function RedbackWeeklySummary() {
                         <View style={styles.pointerBox}>
                           <Text style={styles.pointerTitle}>{item.label}</Text>
                           <Text style={styles.pointerValue}>
-                            {item.value} {selectedChart === 'Minutes' ? 'min' : 'cal'}
+                            {item.value}{" "}
+                            {selectedChart === "Minutes" ? "min" : "cal"}
                           </Text>
                         </View>
                       );
@@ -255,278 +308,339 @@ export default function RedbackWeeklySummary() {
 
               <Text style={styles.chartInsight}>
                 {peakPoint
-                  ? `Peak ${selectedChart.toLowerCase()} was ${peakPoint.value} on ${peakPoint.label}`
-                  : 'No chart data available'}
+                  ? `Peak ${selectedChart.toLowerCase()} was ${peakPoint.value} on ${peakPoint.label}.`
+                  : "No chart data available."}
               </Text>
-            </LinearGradient>
-
-            <View style={styles.infoGrid}>
-              <LinearGradient
-                colors={['#edc3a8', '#d56a20']}
-                style={styles.infoCard}
-              >
-                <MaterialIcons name="schedule" size={24} color="#ffffff" />
-                <Text style={styles.infoLabel}>Total Ride Time</Text>
-                <Text style={styles.infoValue}>{formattedTotalTime}</Text>
-              </LinearGradient>
-
-              <LinearGradient
-                colors={['#c8f4c8', '#4bd864']}
-                style={styles.infoCard}
-              >
-                <MaterialIcons name="event-available" size={24} color="#ffffff" />
-                <Text style={styles.infoLabel}>Active Days</Text>
-                <Text style={styles.infoValue}>{activeDays} days</Text>
-              </LinearGradient>
             </View>
 
-            <LinearGradient
-              colors={['#a8c9ff', '#168cff']}
-              style={styles.motivationBox}
-            >
-              <Text style={styles.motivation}>
+            <View style={styles.motivationCard}>
+              <Text style={styles.motivationEyebrow}>Coach Note</Text>
+              <Text style={styles.motivationText}>
                 {bestDay
-                  ? `Your strongest day was ${bestDay.day} with ${bestDay.minutes} minutes.`
-                  : 'Keep pushing to hit your weekly targets.'}
+                  ? `Your strongest day was ${bestDay.day} with ${bestDay.minutes} minutes. Keep that same pace rolling into your next session.`
+                  : "Keep riding consistently to unlock a clearer weekly pattern."}
               </Text>
-            </LinearGradient>
-
-            <View style={styles.recentBox}>
-              <Text style={styles.recentTitle}>Recent Workouts</Text>
-
-              {recentWorkouts.map((workout) => (
-                <View key={workout.id} style={styles.workoutRow}>
-                  <View>
-                    <Text style={styles.workoutName}>{workout.title}</Text>
-                    <Text style={styles.workoutDuration}>{workout.duration}</Text>
-                  </View>
-
-                  <Text style={styles.workoutCalories}>{workout.calories}</Text>
-                </View>
-              ))}
             </View>
 
-            <View style={styles.recentBox}>
-              <Text style={styles.recentTitle}>Recent Workouts</Text>
+            <View style={styles.sectionCard}>
+              <Text style={styles.sectionTitle}>Recent Workouts</Text>
+              <Text style={styles.sectionSubtitle}>
+                Your latest sessions at a glance
+              </Text>
 
-              {recentWorkouts.map((workout) => (
-                <View key={workout.id} style={styles.workoutRow}>
-                  <View>
-                    <Text style={styles.workoutName}>{workout.title}</Text>
-                    <Text style={styles.workoutDuration}>{workout.duration}</Text>
+              <View style={styles.workoutList}>
+                {recentWorkouts.map((workout, index) => (
+                  <View
+                    key={workout.id}
+                    style={[
+                      styles.workoutRow,
+                      index === recentWorkouts.length - 1 &&
+                        styles.workoutRowLast,
+                    ]}
+                  >
+                    <View style={styles.workoutLeft}>
+                      <View style={styles.workoutIconWrap}>
+                        <MaterialCommunityIcons
+                          name="bike"
+                          size={18}
+                          color="#EB7363"
+                        />
+                      </View>
+                      <View>
+                        <Text style={styles.workoutName}>{workout.title}</Text>
+                        <Text style={styles.workoutDuration}>
+                          {workout.duration}
+                        </Text>
+                      </View>
+                    </View>
+
+                    <Text style={styles.workoutCalories}>{workout.calories}</Text>
                   </View>
-
-                  <Text style={styles.workoutCalories}>{workout.calories}</Text>
-                </View>
-              ))}
+                ))}
+              </View>
             </View>
           </>
         )}
       </ScrollView>
-    </SafeAreaView>
+    </CustomSafeArea>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#ffffff',
-    paddingTop: StatusBar.currentHeight || 20,
-  },
   container: {
-    paddingHorizontal: 15,
-    paddingBottom: 40,
-    backgroundColor: '#ffffff',
+    paddingHorizontal: 16,
+    paddingTop: 16,
+    paddingBottom: 28,
+    backgroundColor: "#050505",
   },
-  loader: {
-    marginTop: 40,
+  header: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 18,
   },
-  headerRow: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginTop: 10,
-    marginBottom: 28,
-  },
-  loader: {
-    marginTop: 40,
+  headerCopy: {
+    flex: 1,
+    paddingRight: 16,
   },
   title: {
-    fontSize: 39,
-    fontWeight: '900',
-    color: '#3A0A50',
-    lineHeight: 46,
+    color: "white",
+    fontSize: 32,
+    fontWeight: "700",
   },
   subtitle: {
-    fontSize: 15,
-    color: '#6F5B7B',
-    fontWeight: '600',
+    color: "#A1A1AA",
+    fontSize: 14,
+    lineHeight: 21,
     marginTop: 6,
   },
-  headerIcon: {
-    fontSize: 30,
-    marginTop: 6,
+  headerIconButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "#111111",
+    borderWidth: 1,
+    borderColor: "#1f1f1f",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  cardGrid: {
-    width: '100%',
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  loadingState: {
+    paddingTop: 40,
+    paddingBottom: 32,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  summaryCard: {
-    width: '48.5%',
-    minHeight: 125,
-    borderRadius: 18,
-    padding: 14,
+  heroCard: {
+    backgroundColor: "#101014",
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "#1c1c22",
+    padding: 20,
     marginBottom: 14,
-    justifyContent: 'space-between',
   },
-  cardLabel: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '800',
+  heroTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
-  cardValue: {
-    color: '#ffffff',
+  heroEyebrow: {
+    color: "#FCA5A5",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  heroTitle: {
+    color: "white",
     fontSize: 24,
-    fontWeight: '900',
-    marginTop: 4,
+    fontWeight: "700",
+    marginTop: 10,
   },
-  chartCard: {
-    width: '100%',
+  heroCopy: {
+    color: "#A1A1AA",
+    fontSize: 14,
+    lineHeight: 21,
+    marginTop: 8,
+  },
+  heroBadge: {
+    width: 58,
+    height: 58,
     borderRadius: 18,
-    padding: 18,
-    marginTop: 4,
-    marginBottom: 18,
-    overflow: 'hidden',
+    backgroundColor: "#EB7363",
+    alignItems: "center",
+    justifyContent: "center",
   },
-  chartHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 18,
-  },
-  chartTitle: {
-    color: '#ffffff',
-    fontSize: 25,
-    fontWeight: '900',
-  },
-  chartTabs: {
-    flexDirection: 'row',
-  },
-  chartTab: {
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(255,255,255,0.35)',
-    marginLeft: 8,
-  },
-  chartTabText: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '800',
-  },
-  chartInner: {
-    marginTop: 4,
-    width: '100%',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  chartInsight: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '800',
-    textAlign: 'center',
-    marginTop: 14,
-  },
-  infoGrid: {
-    width: '100%',
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 16,
+  heroStats: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 18,
   },
   infoCard: {
-    width: '48.5%',
+    flex: 1,
+    backgroundColor: "#18191F",
     borderRadius: 18,
-    padding: 16,
-    minHeight: 115,
-    justifyContent: 'space-between',
+    padding: 12,
   },
   infoLabel: {
-    color: '#ffffff',
-    fontSize: 15,
-    fontWeight: '800',
+    color: "#8b8b95",
+    fontSize: 12,
   },
   infoValue: {
-    color: '#ffffff',
-    fontSize: 24,
-    fontWeight: '900',
+    color: "white",
+    fontSize: 16,
+    fontWeight: "700",
+    marginTop: 6,
   },
-  motivationBox: {
-    padding: 18,
-    borderRadius: 18,
-    width: '100%',
-    marginBottom: 18,
+  metricsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 14,
   },
-  motivation: {
-    color: '#ffffff',
-    fontWeight: '900',
-    fontSize: 17,
-    textAlign: 'center',
-  },
-  recentBox: {
-    backgroundColor: '#f3f0f7',
+  metricCard: {
+    width: "48.3%",
+    minHeight: 132,
+    backgroundColor: "#101014",
+    borderRadius: 22,
+    borderWidth: 1,
+    borderColor: "#1c1c22",
     padding: 16,
-    borderRadius: 18,
-    width: '100%',
+    marginBottom: 14,
+    justifyContent: "space-between",
   },
-  recentTitle: {
-    color: '#3A0A50',
+  metricIconWrap: {
+    width: 42,
+    height: 42,
+    borderRadius: 14,
+    backgroundColor: "#18191F",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  metricLabel: {
+    color: "#8b8b95",
+    fontSize: 13,
+    marginTop: 14,
+  },
+  metricValue: {
+    color: "white",
     fontSize: 22,
-    fontWeight: '900',
-    marginBottom: 12,
+    fontWeight: "700",
+    marginTop: 8,
+  },
+  sectionCard: {
+    backgroundColor: "#101014",
+    borderRadius: 28,
+    borderWidth: 1,
+    borderColor: "#1c1c22",
+    padding: 20,
+    marginBottom: 14,
+  },
+  sectionHeader: {
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    color: "white",
+    fontSize: 24,
+    fontWeight: "700",
+  },
+  sectionSubtitle: {
+    color: "#A1A1AA",
+    fontSize: 13,
+    marginTop: 4,
+  },
+  chartTabs: {
+    flexDirection: "row",
+    marginTop: 14,
+  },
+  chartTab: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 16,
+    backgroundColor: "#18191F",
+    marginRight: 8,
+  },
+  chartTabActive: {
+    backgroundColor: "#EB7363",
+  },
+  chartTabText: {
+    color: "#A1A1AA",
+    fontSize: 13,
+    fontWeight: "700",
+  },
+  chartTabTextActive: {
+    color: "white",
+  },
+  chartWrap: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  chartInsight: {
+    color: "#D4D4D8",
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 14,
+  },
+  motivationCard: {
+    backgroundColor: "#15171C",
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "#1f2937",
+    padding: 18,
+    marginBottom: 14,
+  },
+  motivationEyebrow: {
+    color: "#FCA5A5",
+    fontSize: 12,
+    fontWeight: "600",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  motivationText: {
+    color: "white",
+    fontSize: 15,
+    lineHeight: 22,
+    marginTop: 8,
+  },
+  workoutList: {
+    marginTop: 16,
   },
   workoutRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 13,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#ded7e8',
+    borderBottomColor: "#1f1f1f",
+  },
+  workoutRowLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
+  },
+  workoutLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+  },
+  workoutIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 14,
+    backgroundColor: "#18191F",
+    alignItems: "center",
+    justifyContent: "center",
   },
   workoutName: {
-    color: '#3A0A50',
+    color: "white",
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "600",
   },
   workoutDuration: {
-    color: '#7A6A85',
+    color: "#8b8b95",
     fontSize: 13,
-    marginTop: 2,
-    fontWeight: '600',
+    marginTop: 4,
   },
   workoutCalories: {
-    color: '#3A0A50',
-    fontWeight: '900',
-    fontSize: 14,
+    color: "#EB7363",
+    fontSize: 13,
+    fontWeight: "700",
   },
   pointerBox: {
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
+    backgroundColor: "#18191F",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#2a2a30",
     paddingVertical: 8,
     paddingHorizontal: 10,
   },
   pointerTitle: {
-    color: '#6F5B7B',
-    fontSize: 12,
-    marginBottom: 2,
-    fontWeight: '700',
+    color: "#8b8b95",
+    fontSize: 11,
+    fontWeight: "600",
   },
   pointerValue: {
-    color: '#3A0A50',
-    fontWeight: '900',
-    fontSize: 14,
+    color: "white",
+    fontSize: 13,
+    fontWeight: "700",
+    marginTop: 4,
   },
 });
