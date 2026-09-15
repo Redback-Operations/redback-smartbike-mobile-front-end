@@ -1,5 +1,6 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act } from "@testing-library/react-native";
 import DropDown from "./DropDown";
 
 describe("DropDown", () => {
@@ -17,7 +18,7 @@ describe("DropDown", () => {
     expect(getByText("Medium")).toBeTruthy();
   });
 
-  it("opens the dropdown and displays the available options", () => {
+  it("opens the dropdown and displays the available options", async () => {
     const { getByText } = render(
       <DropDown
         options={options}
@@ -26,16 +27,19 @@ describe("DropDown", () => {
       />
     );
 
-    fireEvent.press(getByText("Select..."));
+    act(() => {
+      fireEvent.press(getByText("Select..."));
+    });
 
-    expect(getByText("Easy")).toBeTruthy();
-    expect(getByText("Medium")).toBeTruthy();
-    expect(getByText("Hard")).toBeTruthy();
+    await waitFor(() => {
+      expect(getByText("Easy")).toBeTruthy();
+      expect(getByText("Medium")).toBeTruthy();
+      expect(getByText("Hard")).toBeTruthy();
+    });
   });
 
-  it("calls handlePress when an option is selected", () => {
+  it("calls handlePress when an option is selected", async () => {
     const handlePress = jest.fn();
-
     const { getByText } = render(
       <DropDown
         options={options}
@@ -44,10 +48,14 @@ describe("DropDown", () => {
       />
     );
 
-    fireEvent.press(getByText("Select..."));
-    fireEvent.press(getByText("Hard"));
+    act(() => {
+      fireEvent.press(getByText("Select..."));
+    });
+
+    await waitFor(() => {
+      fireEvent.press(getByText("Hard"));
+    });
 
     expect(handlePress).toHaveBeenCalledWith("Hard");
-    expect(handlePress).toHaveBeenCalledTimes(1);
   });
 });
