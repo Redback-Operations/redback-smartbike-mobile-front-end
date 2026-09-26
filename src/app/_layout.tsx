@@ -1,4 +1,5 @@
 import { AuthProvider, useAuth } from "@/context/authContext";
+import { ThemeProvider } from "@/context/themeContext";
 import { Stack, usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
@@ -129,9 +130,11 @@ const AppNavigator = () => {
 
 const _layout = () => {
   return (
-    <AuthProvider>
-      <AppNavigator />
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <AppNavigator />
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

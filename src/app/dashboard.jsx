@@ -20,7 +20,7 @@
  * Accessible from the login screen via "View dashboard without signing in".
  */
 
-import React, { useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -28,9 +28,10 @@ import {
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  SafeAreaView,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { LineChart, BarChart } from "react-native-gifted-charts";
+import { useTheme } from "@/context/themeContext";
 
 // ── Layout constants ──────────────────────────────────────────────
 // All pixel widths are derived from the physical screen width so the
@@ -55,18 +56,11 @@ const chartCol1 = col1 - PH * 2;
 const chartHalf = colHalf - PH * 2;
 
 // ── Design tokens ─────────────────────────────────────────────────
-// Central colour palette. Update these values to retheme the entire
-// dashboard without touching individual components.
+// Central colour palette. Semantic accent colours (green/amber/red/etc.)
+// stay the same in both themes — only the neutral surface tokens below
+// (bg/card/border/panelBg/text/muted/faint) change between light and dark.
 
-const C = {
-  bg: "#f5f4f0",       // screen background (warm off-white)
-  card: "#ffffff",     // panel / card surface
-  border: "#d3d1c7",   // subtle border between elements
-  panelBg: "#f1efe8",  // inset background used inside panels (e.g. chart rules, placeholders)
-  text: "#1a1a18",     // primary body text
-  muted: "#888780",    // secondary / label text
-  faint: "#b4b2a9",    // tertiary / hint text
-
+const sharedColors = {
   // Green family — used for positive deltas and primary chart fill
   green: "#1D9E75",
   greenDark: "#0F6E56",
@@ -94,6 +88,36 @@ const C = {
   spike: "#D85A30", // MQTT latency spike bars
 };
 
+const lightColors = {
+  ...sharedColors,
+  bg: "#f5f4f0",       // screen background (warm off-white)
+  card: "#ffffff",     // panel / card surface
+  border: "#d3d1c7",   // subtle border between elements
+  panelBg: "#f1efe8",  // inset background used inside panels (e.g. chart rules, placeholders)
+  text: "#1a1a18",     // primary body text
+  muted: "#888780",    // secondary / label text
+  faint: "#b4b2a9",    // tertiary / hint text
+};
+
+const darkColors = {
+  ...sharedColors,
+  bg: "#121212",       // screen background
+  card: "#1e1e1e",     // panel / card surface
+  border: "#333330",   // subtle border between elements
+  panelBg: "#252520",  // inset background used inside panels (e.g. chart rules, placeholders)
+  text: "#f2f2ef",     // primary body text
+  muted: "#a8a79f",    // secondary / label text
+  faint: "#7a7970",    // tertiary / hint text
+};
+
+// Context so every nested component/tab can read the currently active
+// palette + stylesheet without threading props through each call site.
+const DashboardStyleContext = createContext({
+  C: lightColors,
+  s: StyleSheet.create({}),
+});
+const useDashStyles = () => useContext(DashboardStyleContext);
+
 // ── Synthetic data ────────────────────────────────────────────────
 // Replace each constant below with an API fetch / hook when the
 // backend is ready. The shape of each array matches what the chart
@@ -114,16 +138,16 @@ const overviewKpis = [
 // Weekly session counts — bar colour encodes volume tier
 const weeklyData = [12, 18, 15, 24, 22, 29, 32, 26, 36, 34, 31, 40].map(v => ({
   value: v,
-  frontColor: v >= 30 ? C.green : v >= 20 ? C.greenMid : C.greenLight,
+  frontColor: v >= 30 ? sharedColors.green : v >= 20 ? sharedColors.greenMid : sharedColors.greenLight,
 }));
 
 // Horizontal bar chart — completion % per VR mission
 const missionCompletion = [
-  { name: "Forest Trail", pct: 84, color: C.green },
-  { name: "Mountain Peak", pct: 61, color: C.blue },
-  { name: "City Sprint", pct: 77, color: C.greenMid },
-  { name: "Ocean Breeze", pct: 70, color: C.purple },
-  { name: "Desert Storm", pct: 55, color: C.orange },
+  { name: "Forest Trail", pct: 84, color: sharedColors.green },
+  { name: "Mountain Peak", pct: 61, color: sharedColors.blue },
+  { name: "City Sprint", pct: 77, color: sharedColors.greenMid },
+  { name: "Ocean Breeze", pct: 70, color: sharedColors.purple },
+  { name: "Desert Storm", pct: 55, color: sharedColors.orange },
 ];
 
 // Leaderboard table — top 5 users by total distance ridden
@@ -146,36 +170,36 @@ const performanceKpis = [
 
 // Rolling 7-day average speed — one point per session date
 const speedTrend = [21, 23, 22, 25, 24, 27, 26, 28, 25, 29, 30, 28].map(v => ({
-  value: v, dataPointColor: C.green,
+  value: v, dataPointColor: sharedColors.green,
 }));
 
 // Speed distribution histogram — sessions bucketed in 5 km/h bins
 const speedDist = [
-  { value: 3, label: "<15", frontColor: C.greenLight },
-  { value: 12, label: "15-20", frontColor: C.greenLight },
-  { value: 28, label: "20-25", frontColor: C.greenMid },
-  { value: 35, label: "25-30", frontColor: C.green },
-  { value: 18, label: "30-35", frontColor: C.greenMid },
-  { value: 7, label: ">35", frontColor: C.greenLight },
+  { value: 3, label: "<15", frontColor: sharedColors.greenLight },
+  { value: 12, label: "15-20", frontColor: sharedColors.greenLight },
+  { value: 28, label: "20-25", frontColor: sharedColors.greenMid },
+  { value: 35, label: "25-30", frontColor: sharedColors.green },
+  { value: 18, label: "30-35", frontColor: sharedColors.greenMid },
+  { value: 7, label: ">35", frontColor: sharedColors.greenLight },
 ];
 
 // Average calories burned per session at each resistance level (2–10)
 const caloriesByResist = [
-  { value: 180, label: "2", frontColor: C.greenLight },
-  { value: 210, label: "4", frontColor: C.greenLight },
-  { value: 265, label: "6", frontColor: C.greenMid },
-  { value: 318, label: "8", frontColor: C.green },
-  { value: 390, label: "10", frontColor: C.greenDark },
+  { value: 180, label: "2", frontColor: sharedColors.greenLight },
+  { value: 210, label: "4", frontColor: sharedColors.greenLight },
+  { value: 265, label: "6", frontColor: sharedColors.greenMid },
+  { value: 318, label: "8", frontColor: sharedColors.green },
+  { value: 390, label: "10", frontColor: sharedColors.greenDark },
 ];
 
 // Number of brake events recorded per session sample
 const brakeEvents = [
-  { value: 4, label: "S1", frontColor: C.greenLight },
-  { value: 7, label: "S2", frontColor: C.greenMid },
-  { value: 3, label: "S3", frontColor: C.greenLight },
-  { value: 9, label: "S4", frontColor: C.amberFill }, // above-average — amber
-  { value: 5, label: "S5", frontColor: C.greenMid },
-  { value: 6, label: "S6", frontColor: C.greenMid },
+  { value: 4, label: "S1", frontColor: sharedColors.greenLight },
+  { value: 7, label: "S2", frontColor: sharedColors.greenMid },
+  { value: 3, label: "S3", frontColor: sharedColors.greenLight },
+  { value: 9, label: "S4", frontColor: sharedColors.amberFill }, // above-average — amber
+  { value: 5, label: "S5", frontColor: sharedColors.greenMid },
+  { value: 6, label: "S6", frontColor: sharedColors.greenMid },
 ];
 
 // --- Engagement tab ---
@@ -189,11 +213,11 @@ const engagementKpis = [
 
 // Total play count per mission — drives the horizontal bar chart
 const missionPlays = [
-  { name: "Forest Trail", value: 148, color: C.green },
-  { name: "City Sprint", value: 122, color: C.greenMid },
-  { name: "Ocean Breeze", value: 101, color: C.greenLight },
-  { name: "Mountain Peak", value: 80, color: C.purple },
-  { name: "Desert Storm", value: 31, color: C.orange },
+  { name: "Forest Trail", value: 148, color: sharedColors.green },
+  { name: "City Sprint", value: 122, color: sharedColors.greenMid },
+  { name: "Ocean Breeze", value: 101, color: sharedColors.greenLight },
+  { name: "Mountain Peak", value: 80, color: sharedColors.purple },
+  { name: "Desert Storm", value: 31, color: sharedColors.orange },
 ];
 
 // Heatmap: rows = time-of-day [AM, PM, Eve], cols = day [Mon–Sun]
@@ -209,11 +233,11 @@ const hmColors = ["#f1efe8", "#C8EFE1", "#9FE1CB", "#5DCAA5", "#1D9E75"]; // ind
 
 // Average session duration (minutes) per mission type
 const missionDuration = [
-  { value: 38, label: "Forest", frontColor: C.green },
-  { value: 28, label: "City", frontColor: C.greenMid },
-  { value: 42, label: "Ocean", frontColor: C.blue },
-  { value: 22, label: "Mtn", frontColor: C.purple },
-  { value: 18, label: "Desert", frontColor: C.orange },
+  { value: 38, label: "Forest", frontColor: sharedColors.green },
+  { value: 28, label: "City", frontColor: sharedColors.greenMid },
+  { value: 42, label: "Ocean", frontColor: sharedColors.blue },
+  { value: 22, label: "Mtn", frontColor: sharedColors.purple },
+  { value: 18, label: "Desert", frontColor: sharedColors.orange },
 ];
 
 // --- System Health tab ---
@@ -228,18 +252,19 @@ const systemKpis = [
 // Raw MQTT round-trip times in ms — bars > 500 ms are coloured as spikes
 const mqttData = [80, 100, 72, 120, 88, 1840, 112, 80, 140, 96, 72, 1200, 88, 76, 120, 84, 100, 80, 68, 92].map(v => ({
   value: v,
-  frontColor: v > 500 ? C.spike : C.greenMid,
+  frontColor: v > 500 ? sharedColors.spike : sharedColors.greenMid,
 }));
 
 // Weekly count of full connection drops (Bluetooth/WiFi disconnects)
 const disconnectData = [
-  { value: 3, label: "W1", frontColor: C.greenMid },
-  { value: 5, label: "W2", frontColor: C.greenMid },
-  { value: 2, label: "W3", frontColor: C.greenMid },
-  { value: 8, label: "W4", frontColor: C.amberFill }, // elevated — amber
-  { value: 4, label: "W5", frontColor: C.greenMid },
-  { value: 1, label: "W6", frontColor: C.greenMid },
+  { value: 3, label: "W1", frontColor: sharedColors.greenMid },
+  { value: 5, label: "W2", frontColor: sharedColors.greenMid },
+  { value: 2, label: "W3", frontColor: sharedColors.greenMid },
+  { value: 8, label: "W4", frontColor: sharedColors.amberFill }, // elevated — amber
+  { value: 4, label: "W5", frontColor: sharedColors.greenMid },
+  { value: 1, label: "W6", frontColor: sharedColors.greenMid },
 ];
+
 
 // Sensor error rates by sensor type — badge colour encodes severity
 const sensorErrors = [
@@ -256,6 +281,7 @@ const sensorErrors = [
 
 // Coloured pill label — green / amber / red
 function Badge({ label, type }) {
+  const { C, s } = useDashStyles();
   const map = {
     green: { bg: C.greenBg, color: C.greenText },
     amber: { bg: C.amberBg, color: C.amberText },
@@ -271,11 +297,13 @@ function Badge({ label, type }) {
 
 // Small uppercase section heading displayed above a group of panels
 function SectionLabel({ text }) {
+  const { s } = useDashStyles();
   return <Text style={s.sectionLabel}>{text}</Text>;
 }
 
 // A single KPI tile — label + headline value + optional coloured delta
 function KpiCard({ label, value, delta, type, cardStyle }) {
+  const { C, s } = useDashStyles();
   const dc = { up: C.green, warn: C.amber, down: C.red, neutral: C.faint }[type] || C.faint;
   return (
     <View style={[s.kpiCard, cardStyle]}>
@@ -289,6 +317,7 @@ function KpiCard({ label, value, delta, type, cardStyle }) {
 // White rounded card that wraps any chart or list content.
 // Pass flex={n} to make it grow/shrink inside a Row.
 function Panel({ children, flex, style }) {
+  const { s } = useDashStyles();
   return (
     <View style={[s.panel, flex !== undefined && { flex }, style]}>
       {children}
@@ -298,6 +327,7 @@ function Panel({ children, flex, style }) {
 
 // Uppercase panel title + optional Badge aligned to the right
 function PanelHeader({ title, badge, badgeType }) {
+  const { s } = useDashStyles();
   return (
     <View style={s.panelHeader}>
       <Text style={s.panelTitle} numberOfLines={2}>{title}</Text>
@@ -309,6 +339,7 @@ function PanelHeader({ title, badge, badgeType }) {
 // Horizontal gauge bar — used for team delivery and connection status
 // pct: 0–100, rendered as a percentage-width filled bar
 function HBar({ label, pct, color, labelColor }) {
+  const { s } = useDashStyles();
   return (
     <View style={s.hbarRow}>
       <Text style={[s.hbarLabel, labelColor && { color: labelColor }]}>{label}</Text>
@@ -323,6 +354,7 @@ function HBar({ label, pct, color, labelColor }) {
 // Horizontal mission bar — supports both raw count (value/max) and
 // direct percentage (pct) so it works for both completion and play count
 function MBar({ name, pct, value, max, color }) {
+  const { s } = useDashStyles();
   const fill = value !== undefined ? Math.round((value / max) * 100) : pct;
   const display = value !== undefined ? String(value) : `${pct}%`;
   return (
@@ -340,6 +372,7 @@ function MBar({ name, pct, value, max, color }) {
 // (e.g. scatter plot, stacked bar). Replace with a real chart component
 // once the relevant library or data is available.
 function ChartPlaceholder({ label, height = 80 }) {
+  const { s } = useDashStyles();
   return (
     <View style={[s.placeholder, { height }]}>
       <Text style={s.placeholderText}>{label}</Text>
@@ -349,17 +382,20 @@ function ChartPlaceholder({ label, height = 80 }) {
 
 // Small footnote text rendered below a chart
 function Note({ children }) {
+  const { s } = useDashStyles();
   return <Text style={s.note}>{children}</Text>;
 }
 
 // Lays out two Panels side by side with a GAP between them
 function Row({ children, style }) {
+  const { s } = useDashStyles();
   return <View style={[s.row, style]}>{children}</View>;
 }
 
 // 2×2 grid of KPI cards — used by Performance, Engagement, System Health
 // Each card is half the available width so exactly two fit per row
 function KpiGrid4({ kpis }) {
+  const { s } = useDashStyles();
   return (
     <View style={s.kpiGrid4}>
       {kpis.map(k => (
@@ -373,6 +409,7 @@ function KpiGrid4({ kpis }) {
 // Cell colour is looked up from hmColors using the intensity value (0–4)
 // stored in heatmapData.
 function Heatmap() {
+  const { s } = useDashStyles();
   return (
     <View>
       {/* Day-of-week header row */}
@@ -402,6 +439,7 @@ function Heatmap() {
 // as props (or via context / a hook) into the relevant tab.
 
 function OverviewTab() {
+  const { C, s } = useDashStyles();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.tabContent}>
       <SectionLabel text="KEY METRICS · THIS TRIMESTER" />
@@ -474,6 +512,7 @@ function OverviewTab() {
 }
 
 function PerformanceTab() {
+  const { C, s } = useDashStyles();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.tabContent}>
       <SectionLabel text="RIDER PERFORMANCE METRICS" />
@@ -577,6 +616,7 @@ function PerformanceTab() {
 }
 
 function EngagementTab() {
+  const { C, s } = useDashStyles();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.tabContent}>
       <SectionLabel text="USER ENGAGEMENT & GAMIFICATION" />
@@ -629,6 +669,7 @@ function EngagementTab() {
 }
 
 function SystemHealthTab() {
+  const { C, s } = useDashStyles();
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={s.tabContent}>
       <SectionLabel text="SYSTEM & CONNECTIVITY METRICS" />
@@ -705,11 +746,13 @@ function SystemHealthTab() {
 
 const TABS = ["Overview", "Performance", "Engagement", "System Health"];
 
-export default function Dashboard() {
+function DashboardInner() {
   const [active, setActive] = useState(0); // index of the currently visible tab
+  const { C, s } = useDashStyles();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <SafeAreaView style={s.safe}>
+    <SafeAreaView style={s.safe} edges={["top", "left", "right"]}>
 
       {/* ── Header bar ── */}
       <View style={s.topBar}>
@@ -722,7 +765,12 @@ export default function Dashboard() {
             <Text style={s.logoSub}>T2 2026 · Last updated: 13 Apr 2026</Text>
           </View>
         </View>
-        <Badge label="System Healthy" type="green" />
+        <View style={s.headerActions}>
+          <Badge label="System Healthy" type="green" />
+          <TouchableOpacity testID="dashboard-theme-toggle" onPress={toggleTheme} style={s.themeToggle}>
+            <Text style={s.themeToggleText}>{isDark ? "☀️" : "🌙"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* ── Tab bar ── */}
@@ -730,6 +778,7 @@ export default function Dashboard() {
         {TABS.map((tab, i) => (
           <TouchableOpacity
             key={tab}
+            testID={`dashboard-tab-${tab}`}
             style={[s.tabItem, active === i && s.tabItemActive]}
             onPress={() => setActive(i)}
           >
@@ -750,9 +799,24 @@ export default function Dashboard() {
   );
 }
 
+// Provides the themed colour tokens + stylesheet to DashboardInner and
+// every nested tab/component via context, recomputed only when the
+// app-wide theme changes.
+export default function Dashboard() {
+  const { theme } = useTheme();
+  const C = useMemo(() => (theme === "dark" ? darkColors : lightColors), [theme]);
+  const s = useMemo(() => buildStyles(C), [C]);
+
+  return (
+    <DashboardStyleContext.Provider value={{ C, s }}>
+      <DashboardInner />
+    </DashboardStyleContext.Provider>
+  );
+}
+
 // ── Styles ────────────────────────────────────────────────────────
 
-const s = StyleSheet.create({
+const buildStyles = (C) => StyleSheet.create({
   safe: { flex: 1, backgroundColor: C.bg },
 
   topBar: {
@@ -763,8 +827,19 @@ const s = StyleSheet.create({
     borderBottomWidth: 0.5,
     borderBottomColor: C.border,
     paddingHorizontal: PADDING,
-    paddingVertical: 10,
+    paddingTop: 18,
+    paddingBottom: 14,
   },
+  headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
+  themeToggle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: C.panelBg,
+  },
+  themeToggleText: { fontSize: 13 },
   logoRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   logoDot: {
     width: 20,
