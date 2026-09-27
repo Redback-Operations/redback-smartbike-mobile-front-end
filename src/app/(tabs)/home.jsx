@@ -49,6 +49,12 @@ const secondaryTiles = [
     link: "/currentWorkout",
     icon: <FontAwesome5 name="running" size={32} color="#22C55E" />,
   },
+  {
+    title: "Challenge Hub",
+    subtitle: "1v1 bike challenges",
+    link: "/challengeHub",
+    icon: <MaterialIcons name="sports-motorsports" size={32} color="#EB7363" />,
+  },
 ];
 
 const StatCard = ({ item }) => {

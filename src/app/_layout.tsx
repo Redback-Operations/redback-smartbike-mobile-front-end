@@ -2,6 +2,7 @@ import { AuthProvider, useAuth } from "@/context/authContext";
 import { Stack, usePathname, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import { ActivityIndicator, View } from "react-native";
+import { ChallengeProvider } from '@/context/challengeContext';
 
 const AppNavigator = () => {
   const { user, loading } = useAuth();
@@ -123,14 +124,31 @@ const AppNavigator = () => {
               headerShown: false,
             }}
           />
-        </Stack>
+        
+      <Stack.Screen
+        name="challengeHub"
+        options={{
+          headerShown: false,
+        }}
+      />  
+
+      <Stack.Screen
+            name="challengeSetup"
+            options={{
+              presentation: "modal",
+              headerShown: false,
+            }}
+          />
+      </Stack>
   );
 };
 
-const _layout = () => {
+const _layout = (): React.ReactElement => {
   return (
     <AuthProvider>
-      <AppNavigator />
+      <ChallengeProvider>
+        <AppNavigator />
+      </ChallengeProvider>
     </AuthProvider>
   );
 };
