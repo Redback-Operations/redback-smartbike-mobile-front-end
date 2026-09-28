@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   Image,
   Linking,
-  Dimensions,
+  useWindowDimensions,
 } from "react-native";
 import React from "react";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -15,15 +15,13 @@ import AntDesign from "@expo/vector-icons/AntDesign";
 import { router, Stack } from "expo-router";
 import CustomSafeArea from "@/components/CustomSafeArea";
 
-const { width } = Dimensions.get("window");
-const isWideScreen = width > 700;
-
+// Paste the real URLs here when they are available.
+// Cards with an empty link are shown as "Coming soon" and can't be tapped.
 const links = [
   {
     title: "See our news",
     subtitle: "Latest updates and announcements",
     link: "",
-    colors: ["#1f2937", "#111827"],
     borderColor: "#374151",
     icon: <FontAwesome name="newspaper-o" size={22} color="#c084fc" />,
   },
@@ -31,7 +29,6 @@ const links = [
     title: "Our privacy policy",
     subtitle: "Learn how your data is handled",
     link: "",
-    colors: ["#1f2937", "#111827"],
     borderColor: "#374151",
     icon: <MaterialIcons name="privacy-tip" size={22} color="#60a5fa" />,
   },
@@ -39,7 +36,6 @@ const links = [
     title: "Get in touch",
     subtitle: "Reach out to our support team",
     link: "/contact",
-    colors: ["#1f2937", "#111827"],
     borderColor: "#374151",
     icon: <Entypo name="mail" size={22} color="#fb7185" />,
   },
@@ -47,22 +43,34 @@ const links = [
     title: "Our website",
     subtitle: "Visit our main platform",
     link: "",
-    colors: ["#1f2937", "#111827"],
     borderColor: "#374151",
     icon: <MaterialIcons name="computer" size={22} color="#f59e0b" />,
   },
 ];
 
 const AboutUs = () => {
+  // Updates when the window is resized (the old version only checked once)
+  const { width } = useWindowDimensions();
+  const isWideScreen = width > 700;
+
   const handlePress = async (item) => {
     if (!item.link) return;
 
+    // Internal screen: push so the back button returns to About Us
     if (item.link.startsWith("/")) {
-      router.replace(item.link);
+      router.push(item.link);
       return;
     }
 
-    await Linking.openURL(item.link);
+    // External website: open it safely
+    try {
+      const supported = await Linking.canOpenURL(item.link);
+      if (!supported) throw new Error("Unsupported URL");
+      await Linking.openURL(item.link);
+    } catch (error) {
+      console.error("Could not open link:", error);
+      alert("Sorry, this link could not be opened.");
+    }
   };
 
   return (
@@ -89,6 +97,8 @@ const AboutUs = () => {
               <View style={{ marginBottom: 28 }}>
                 <TouchableOpacity
                   onPress={() => router.replace("/settings")}
+                  accessibilityRole="button"
+                  accessibilityLabel="Back to settings"
                   style={{
                     alignSelf: "flex-start",
                     marginBottom: 18,
@@ -124,11 +134,9 @@ const AboutUs = () => {
                   >
                     <Image
                       source={require("@assets/redback-logo.png")}
-                      style={{
-                        width: 105,
-                        height: 105,
-                      }}
+                      style={{ width: 105, height: 105 }}
                       resizeMode="contain"
+                      accessibilityLabel="Redback Operations logo"
                     />
                   </View>
 
@@ -175,66 +183,102 @@ const AboutUs = () => {
                 </View>
               </View>
             }
-            renderItem={({ item }) => (
-              <TouchableOpacity
-                onPress={() => handlePress(item)}
-                style={{
-                  flex: 1,
-                  marginBottom: isWideScreen ? 0 : 16,
-                }}
-                activeOpacity={0.86}
-              >
-                <View
+            renderItem={({ item }) => {
+              const available = Boolean(item.link);
+
+              return (
+                <TouchableOpacity
+                  onPress={() => handlePress(item)}
+                  disabled={!available}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    available ? item.title : `${item.title}, coming soon`
+                  }
+                  accessibilityState={{ disabled: !available }}
                   style={{
-                    minHeight: 165,
-                    borderRadius: 22,
-                    padding: 18,
-                    justifyContent: "space-between",
-                    borderWidth: 1,
-                    borderColor: item.borderColor,
-                    backgroundColor: "#111827",
+                    flex: 1,
+                    marginBottom: isWideScreen ? 0 : 16,
+                    opacity: available ? 1 : 0.5,
                   }}
+                  activeOpacity={0.86}
                 >
                   <View
                     style={{
-                      width: 44,
-                      height: 44,
-                      borderRadius: 14,
-                      backgroundColor: "#18181b",
-                      alignItems: "center",
-                      justifyContent: "center",
+                      minHeight: 165,
+                      borderRadius: 22,
+                      padding: 18,
+                      justifyContent: "space-between",
                       borderWidth: 1,
-                      borderColor: "#2a2a2a",
+                      borderColor: item.borderColor,
+                      backgroundColor: "#111827",
                     }}
                   >
-                    {item.icon}
-                  </View>
-
-                  <View>
-                    <Text
+                    <View
                       style={{
-                        color: "white",
-                        fontSize: 22,
-                        fontWeight: "700",
-                        marginBottom: 6,
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
                       }}
                     >
-                      {item.title}
-                    </Text>
+                      <View
+                        style={{
+                          width: 44,
+                          height: 44,
+                          borderRadius: 14,
+                          backgroundColor: "#18181b",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          borderWidth: 1,
+                          borderColor: "#2a2a2a",
+                        }}
+                      >
+                        {item.icon}
+                      </View>
 
-                    <Text
-                      style={{
-                        color: "#9ca3af",
-                        fontSize: 13,
-                        lineHeight: 18,
-                      }}
-                    >
-                      {item.subtitle}
-                    </Text>
+                      {available ? (
+                        <AntDesign name="right" size={16} color="#9ca3af" />
+                      ) : (
+                        <View
+                          style={{
+                            backgroundColor: "#27272a",
+                            borderRadius: 999,
+                            paddingHorizontal: 10,
+                            paddingVertical: 4,
+                          }}
+                        >
+                          <Text style={{ color: "#d4d4d8", fontSize: 11, fontWeight: "600" }}>
+                            Coming soon
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+
+                    <View>
+                      <Text
+                        style={{
+                          color: "white",
+                          fontSize: 22,
+                          fontWeight: "700",
+                          marginBottom: 6,
+                        }}
+                      >
+                        {item.title}
+                      </Text>
+
+                      <Text
+                        style={{
+                          color: "#9ca3af",
+                          fontSize: 13,
+                          lineHeight: 18,
+                        }}
+                      >
+                        {item.subtitle}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              </TouchableOpacity>
-            )}
+                </TouchableOpacity>
+              );
+            }}
           />
         </View>
       </CustomSafeArea>
