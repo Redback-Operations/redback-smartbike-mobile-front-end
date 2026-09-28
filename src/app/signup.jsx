@@ -17,6 +17,7 @@ import LoginIcon from "@/components/LoginIcon";
 import { Link, router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/context/authContext";
+import { showAlert } from "@/lib/showAlert";
 
 const SignUp = () => {
   const { signUp, signInWithOAuth } = useAuth();
@@ -29,7 +30,7 @@ const SignUp = () => {
 
   const handleSignup = async () => {
     if (!userData.username || !userData.email || !userData.password) {
-      Alert.alert("Missing fields", "Please complete all fields");
+      showAlert("Missing fields", "Please complete all fields");
       return;
     }
 
@@ -41,7 +42,7 @@ const SignUp = () => {
       );
 
       if (error) {
-        Alert.alert("Signup failed", error.message);
+        showAlert("Signup failed", error.message);
         return;
       }
 
@@ -49,22 +50,22 @@ const SignUp = () => {
       const createdSession = data?.session;
 
       if (!createdUser) {
-        Alert.alert("Signup failed", "No user was returned from Supabase");
+        showAlert("Signup failed", "No user was returned from Supabase");
         return;
       }
 
       if (createdSession) {
-        Alert.alert("Success", "Account created successfully");
+        showAlert("Success", "Account created successfully");
         router.replace("/(tabs)/home");
       } else {
-        Alert.alert(
+        showAlert(
           "Check your email",
           "Account created. Please verify your email before logging in."
         );
         router.replace("/");
       }
     } catch (err) {
-      Alert.alert(
+      showAlert(
         "Error",
         err?.message || "Something went wrong while creating your account"
       );
@@ -76,10 +77,10 @@ const SignUp = () => {
       const { error } = await signInWithOAuth(provider);
 
       if (error) {
-        Alert.alert("Signup failed", error.message);
+        showAlert("Signup failed", error.message);
       }
     } catch (err) {
-      Alert.alert(
+      showAlert(
         "Signup failed",
         "Something went wrong while creating your account."
       );

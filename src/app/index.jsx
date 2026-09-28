@@ -18,6 +18,7 @@ import { Link, router } from "expo-router";
 import "@expo/metro-runtime";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "@/context/authContext";
+import { showAlert } from "@/lib/showAlert";
 
 const index = () => {
   const { signIn, signInWithOAuth } = useAuth();
@@ -48,10 +49,10 @@ const index = () => {
       const { error } = await signInWithOAuth(provider);
 
       if (error) {
-        Alert.alert("Sign in failed", error.message);
+        showAlert("Sign in failed", error.message);
       }
     } catch (err) {
-      Alert.alert("Sign in failed", "Something went wrong while signing in.");
+      showAlert("Sign in failed", "Something went wrong while signing in.");
     }
   };
 
